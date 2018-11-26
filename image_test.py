@@ -4,9 +4,24 @@
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
-from os import listdir
-
+import os
+import pandas as pd
+import glob
+"""
+x - sample
+b - channel in blue
+b_coeff - 
+g - channel in green
+g_coeff
+r - channel in red
+r_coeff
+workDir - working directory
+"""
+# merge function
 def channel_merge(x, b, b_coeff, g, g_coeff, r, r_coeff, workDir):
+
+
+
     # adaptive equalizing
     clahe = cv2.createCLAHE(clipLimit=4.0, tileGridSize=(32, 32))
     cl1 = clahe.apply(b)
@@ -19,25 +34,39 @@ def channel_merge(x, b, b_coeff, g, g_coeff, r, r_coeff, workDir):
     img[:, :, 1] = cl2 / g_coeff
     img[:, :, 2] = cl3 / r_coeff
 
-    # plot histograms for every channel
-    color = ('b', 'g', 'r')
-    for i, col in enumerate(color):
-        histr = cv2.calcHist([lol], [i], None, [256], [0, 256])
-        plt.plot(histr, color=col)
-        plt.xlim([0, 256])
-    plt.show()
-
     # write image
-    cv2.imwrite("/".join([workDir, x]), img)
+    cv2.imwrite("".join(["/".join([workDir, x]), ".tif"]), img)
+
+# ignoring hidden files
+def listdir_nohidden(path):
+    return [os.path.basename(x) for x in glob.glob(os.path.join(path, '*'))]
 
 
-# import images
-b = cv2.imread("/Users/antonogorodnikov/Desktop/img/r01c01f01p01-ch1sk1fk1fl1.tiff", -1)
-g = cv2.imread("/Users/antonogorodnikov/Desktop/img/r01c01f01p01-ch2sk1fk1fl1.tiff", -1)
-r = cv2.imread("/Users/antonogorodnikov/Desktop/img/r01c01f01p01-ch3sk1fk1fl1.tiff", -1)
+
+globPath = "/Users/antonogorodnikov/Desktop"
+inPath = '/'.join([globPath, "img"])
+inDir = listdir_nohidden(inPath)
+inDir.sort()
+dfDir = pd.DataFrame(inDir, columns=['Name'])
+outPath = '/'.join([globPath, "converted"])
+if not os.path.exists(outPath):
+    os.makedirs(outPath)
 
 
-20, 100, 50
+# split file name, extract sample name
+dfDir["Sample"] = dfDir["Name"].str.split('-', expand=True)[0]
 
-direct = listdir("/Users/antonogorodnikov/Desktop/img")
-for x in
+# loop over each sample
+for num, x in enumerate(dfDir["Sample"].unique()):
+
+    # subset df for relevant sample name
+    dfRel = dfDir[dfDir.Sample == x]
+
+    # import images for each channel
+    b = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains('ch1'),'Name'].to_string(index=False)]), -1)
+    g = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains('ch2'),'Name'].to_string(index=False)]), -1)
+    r = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains('ch3'),'Name'].to_string(index=False)]), -1)
+
+    # perform main func
+    channel_merge(x=x, b=b, b_coeff=20, g=g, g_coeff=100, r=r, r_coeff=50, workDir=outPath)
+
