@@ -1,21 +1,40 @@
-"""testing basic image processing functions"""
+"""testing basic image processing functions
 
 
-import cv2
-import numpy as np
-import os
-import pandas as pd
-import glob
-"""
 x - sample
 b - channel in blue
-b_coeff - 
+b_coeff -
 g - channel in green
 g_coeff
 r - channel in red
 r_coeff
 workDir - working directory
 """
+
+import cv2
+import numpy as np
+import os
+import pandas as pd
+import glob
+
+import argparse
+from argparse import RawTextHelpFormatter
+
+
+parser = argparse.ArgumentParser(
+    description='''Program to merge fluorescent image channels and prepare for segmentation''',
+    formatter_class=RawTextHelpFormatter,
+    epilog="""Merge wisely""")
+parser.add_argument('--wd', help='directory with images')
+parser.add_argument('-o', help='output text file')
+parser.add_argument('--left', help='sequence upstream SpCas9 cut, which is 3 nt before PAM')
+parser.add_argument('--right', help='sequence upstream SpCas9 cut')
+if len(sys.argv)==1:
+    parser.print_help(sys.stderr)
+    sys.exit(1)
+argsP = parser.parse_args()
+
+
 # merge function
 def channel_merge(x, b, b_coeff, g, g_coeff, r, r_coeff, workDir):
 
