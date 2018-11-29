@@ -26,9 +26,9 @@ parser = argparse.ArgumentParser(
     formatter_class=RawTextHelpFormatter,
     epilog="""Merge wisely""")
 parser.add_argument('--wd', help='directory with images')
-parser.add_argument('-o', help='output text file')
-parser.add_argument('--left', help='sequence upstream SpCas9 cut, which is 3 nt before PAM')
-parser.add_argument('--right', help='sequence upstream SpCas9 cut')
+parser.add_argument('--b_coeff', help='INT how many folds to decrease blue channel intensity (20)')
+parser.add_argument('--g_coeff', help='INT how many folds to decrease green channel intensity (100)')
+parser.add_argument('--r_coeff', help='INT how many folds to decrease red channel intensity (50)')
 if len(sys.argv)==1:
     parser.print_help(sys.stderr)
     sys.exit(1)
@@ -86,5 +86,5 @@ for num, x in enumerate(dfDir["Sample"].unique()):
     r = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains('ch3'),'Name'].to_string(index=False)]), -1)
 
     # perform main func
-    channel_merge(x=x, b=b, b_coeff=20, g=g, g_coeff=100, r=r, r_coeff=50, workDir=outPath)
+    channel_merge(x=x, b=b, b_coeff=argsP.b_coeff, g=g, g_coeff=argsP.g_coeff, r=r, r_coeff=argsP.r_coeff, workDir=argsP.wd)
 
