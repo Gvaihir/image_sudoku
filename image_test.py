@@ -58,33 +58,32 @@ def listdir_nohidden(path):
     return [os.path.basename(x) for x in glob.glob(os.path.join(path, '*'))]
 
 
+def main():
+    globPath = "/Users/antonogorodnikov/Desktop"
+    inPath = '/'.join([globPath, "img"])
+    inDir = listdir_nohidden(inPath)
+    inDir.sort()
+    dfDir = pd.DataFrame(inDir, columns=['Name'])
+    outPath = '/'.join([globPath, "converted"])
+    if not os.path.exists(outPath):
+        os.makedirs(outPath)
 
-globPath = "/Users/antonogorodnikov/Desktop"
-inPath = '/'.join([globPath, "img"])
-inDir = listdir_nohidden(inPath)
-inDir.sort()
-dfDir = pd.DataFrame(inDir, columns=['Name'])
-outPath = '/'.join([globPath, "converted"])
-if not os.path.exists(outPath):
-    os.makedirs(outPath)
+    # split file name, extract sample name
+    dfDir["Sample"] = dfDir["Name"].str.split('-', expand=True)[0]
 
+    # loop over each sample
+    for num, x in enumerate(dfDir["Sample"].unique()):
+        # subset df for relevant sample name
+        dfRel = dfDir[dfDir.Sample == x]
 
-# split file name, extract sample name
-dfDir["Sample"] = dfDir["Name"].str.split('-', expand=True)[0]
+        # import images for each channel
+        b = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains('ch1'), 'Name'].to_string(index=False)]), -1)
+        g = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains('ch2'), 'Name'].to_string(index=False)]), -1)
+        r = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains('ch3'), 'Name'].to_string(index=False)]), -1)
 
-# loop over each sample
-for num, x in enumerate(dfDir["Sample"].unique()):
+        # perform main func
+        channel_merge(x=x, b=b, b_coeff=argsP.b_coeff, g=g, g_coeff=argsP.g_coeff, r=r, r_coeff=argsP.r_coeff,
+                      workDir=argsP.wd)
 
-    # subset df for relevant sample name
-    dfRel = dfDir[dfDir.Sample == x]
-
-    # import images for each channel
-    b = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains('ch1'),'Name'].to_string(index=False)]), -1)
-    g = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains('ch2'),'Name'].to_string(index=False)]), -1)
-    r = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains('ch3'),'Name'].to_string(index=False)]), -1)
-
-    # perform main func
-    channel_merge(x=x, b=b, b_coeff=argsP.b_coeff, g=g, g_coeff=argsP.g_coeff, r=r, r_coeff=argsP.r_coeff, workDir=argsP.wd)
-
- # write image
-    cv2.imwrite("".join(["/".join([workDir, x]), ".tif"]), img)
+        # write image
+        cv2.imwrite("".join(["/".join([workDir, x]), ".tif"]), img)
