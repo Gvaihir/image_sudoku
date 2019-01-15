@@ -39,7 +39,7 @@ argsP = parser.parse_args()
 def channel_merge(x, b, b_coeff, g, g_coeff, r, r_coeff, workDir):
 
     # adaptive equalizing
-    clahe = cv2.createCLAHE(clipLimit=.0, tileGridSize=(32, 32))
+    clahe = cv2.createCLAHE(clipLimit=4.0, tileGridSize=(32, 32))
     cl1 = clahe.apply(b)
     cl2 = clahe.apply(g)
     cl3 = clahe.apply(r)

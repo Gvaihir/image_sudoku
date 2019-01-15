@@ -25,10 +25,10 @@ parser = argparse.ArgumentParser(
     description='''Program to merge fluorescent image channels and prepare for segmentation''',
     formatter_class=RawTextHelpFormatter,
     epilog="""Merge wisely""")
-parser.add_argument('--wd', default = os.getcwd(), help='directory with images')
-parser.add_argument('--b_coeff', default = 20, help='INT how many folds to decrease blue channel intensity (20)')
-parser.add_argument('--g_coeff', default = 100, help='INT how many folds to decrease green channel intensity (100)')
-parser.add_argument('--r_coeff', default = 50, help='INT how many folds to decrease red channel intensity (50)')
+parser.add_argument('--wd', default = os.getcwd(), help='directory with images. Default - WD')
+parser.add_argument('--b_coeff', default = 20, type=float, help='INT how many folds to decrease blue channel intensity (Default: 20)')
+parser.add_argument('--g_coeff', default = 100, type=float, help='INT how many folds to decrease green channel intensity (Default: 100)')
+parser.add_argument('--r_coeff', default = 50, type=float, help='INT how many folds to decrease red channel intensity (Default: 50)')
 if len(sys.argv)==1:
     parser.print_help(sys.stderr)
     sys.exit(1)
@@ -39,7 +39,7 @@ argsP = parser.parse_args()
 def channel_merge(x, b, b_coeff, g, g_coeff, r, r_coeff, workDir):
 
     # adaptive equalizing
-    clahe = cv2.createCLAHE(clipLimit=.0, tileGridSize=(32, 32))
+    clahe = cv2.createCLAHE(clipLimit=4.0, tileGridSize=(32, 32))
     cl1 = clahe.apply(b)
     cl2 = clahe.apply(g)
     cl3 = clahe.apply(r)
@@ -63,9 +63,11 @@ if __name__ == "__main__":
     inDir = listdir_nohidden(inPath)
     inDir.sort()
     dfDir = pd.DataFrame(inDir, columns=['Name'])
-    outPath = '/'.join([inPath, "converted"])
+    outPath = '/'.join([os.path.dirname(inPath), "converted"])
     if not os.path.exists(outPath):
         os.makedirs(outPath)
+
+
 
     # split file name, extract sample name
     dfDir["Sample"] = dfDir["Name"].str.split('-', expand=True)[0]
