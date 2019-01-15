@@ -38,8 +38,6 @@ argsP = parser.parse_args()
 # merge function
 def channel_merge(x, b, b_coeff, g, g_coeff, r, r_coeff, workDir):
 
-
-
     # adaptive equalizing
     clahe = cv2.createCLAHE(clipLimit=4.0, tileGridSize=(32, 32))
     cl1 = clahe.apply(b)
@@ -52,8 +50,8 @@ def channel_merge(x, b, b_coeff, g, g_coeff, r, r_coeff, workDir):
     img[:, :, 1] = cl2 / g_coeff
     img[:, :, 2] = cl3 / r_coeff
 
-    # write image
-    cv2.imwrite("".join(["/".join([workDir, x]), ".tif"]), img)
+    return img
+
 
 # ignoring hidden files
 def listdir_nohidden(path):
@@ -88,3 +86,5 @@ for num, x in enumerate(dfDir["Sample"].unique()):
     # perform main func
     channel_merge(x=x, b=b, b_coeff=argsP.b_coeff, g=g, g_coeff=argsP.g_coeff, r=r, r_coeff=argsP.r_coeff, workDir=argsP.wd)
 
+ # write image
+    cv2.imwrite("".join(["/".join([workDir, x]), ".tif"]), img)
