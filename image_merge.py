@@ -25,10 +25,10 @@ parser = argparse.ArgumentParser(
     description='''Program to merge fluorescent image channels and prepare for segmentation''',
     formatter_class=RawTextHelpFormatter,
     epilog="""Merge wisely""")
-parser.add_argument('--wd', help='directory with images')
-parser.add_argument('--b_coeff', help='INT how many folds to decrease blue channel intensity (20)')
-parser.add_argument('--g_coeff', help='INT how many folds to decrease green channel intensity (100)')
-parser.add_argument('--r_coeff', help='INT how many folds to decrease red channel intensity (50)')
+parser.add_argument('--wd', default = os.getcwd(), help='directory with images')
+parser.add_argument('--b_coeff', default = 20, help='INT how many folds to decrease blue channel intensity (20)')
+parser.add_argument('--g_coeff', default = 100, help='INT how many folds to decrease green channel intensity (100)')
+parser.add_argument('--r_coeff', default = 50, help='INT how many folds to decrease red channel intensity (50)')
 if len(sys.argv)==1:
     parser.print_help(sys.stderr)
     sys.exit(1)
