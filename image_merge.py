@@ -58,13 +58,12 @@ def listdir_nohidden(path):
     return [os.path.basename(x) for x in glob.glob(os.path.join(path, '*'))]
 
 
-def main():
-    globPath = "/Users/ogorodnikov/Desktop"
-    inPath = '/'.join([globPath, "img"])
+if __name__ == "__main__":
+    inPath = argsP.wd
     inDir = listdir_nohidden(inPath)
     inDir.sort()
     dfDir = pd.DataFrame(inDir, columns=['Name'])
-    outPath = '/'.join([globPath, "converted"])
+    outPath = '/'.join([inPath, "converted"])
     if not os.path.exists(outPath):
         os.makedirs(outPath)
 
@@ -86,4 +85,4 @@ def main():
                       workDir=argsP.wd)
 
         # write image
-        cv2.imwrite("".join(["/".join([workDir, x]), ".tif"]), img)
+        cv2.imwrite("".join(["/".join([outPath, x]), ".tif"]), img)
