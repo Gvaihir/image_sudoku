@@ -8,10 +8,6 @@ import argparse
 from argparse import RawTextHelpFormatter
 from glob import glob
 
-
-%matplotlib inline
-%config InlineBackend.figure_format = 'retina'
-
 # pip
 from tqdm import tqdm
 from tifffile import imread
@@ -90,7 +86,6 @@ if __name__ == "__main__":
     else:
         model = StarDist(conf, name='stardist_shape_completion', basedir='models')
 
-    %%capture train_log
     model.train(X_trn, Y_trn, validation_data=(X_val, Y_val))
 
 
