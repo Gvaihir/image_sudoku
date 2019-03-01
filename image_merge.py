@@ -26,9 +26,11 @@ parser = argparse.ArgumentParser(
     formatter_class=RawTextHelpFormatter,
     epilog="""Merge wisely""")
 parser.add_argument('--wd', default = os.getcwd(), help='directory with images. Default - WD')
-parser.add_argument('--b_coeff', default = 20, type=float, help='INT how many folds to decrease blue channel intensity (Default: 20)')
-parser.add_argument('--g_coeff', default = 100, type=float, help='INT how many folds to decrease green channel intensity (Default: 100)')
-parser.add_argument('--r_coeff', default = 50, type=float, help='INT how many folds to decrease red channel intensity (Default: 50)')
+parser.add_argument('--b_coeff', default = 1, type=float, help='FLOAT Pixel intensity decrease: PI\' = PI * b_coeff / Mean(channel intensity) (Default: 1)')
+parser.add_argument('--g_coeff', default = 1, type=float, help='FLOAT Pixel intensity decrease: PI\' = PI * g_coeff / Mean(channel intensity) (Default: 1)')
+parser.add_argument('--r_coeff', default = 1, type=float, help='FLOAT Pixel intensity decrease: PI\' = PI * r_coeff / Mean(channel intensity) (Default: 1)')
+parser.add_argument('--tile', default = 256, type=int, help='INT Dimension of a tile for segmentation')
+
 if len(sys.argv)==1:
     parser.print_help(sys.stderr)
     sys.exit(1)
@@ -46,9 +48,9 @@ def channel_merge(x, b, b_coeff, g, g_coeff, r, r_coeff, workDir):
 
     # combine channels
     img = np.zeros((b.shape[0], b.shape[1], 3))
-    img[:, :, 0] = cl1 / b_coeff
-    img[:, :, 1] = cl2 / g_coeff
-    img[:, :, 2] = cl3 / r_coeff
+    img[:, :, 0] = cl1 * b_coeff / np.mean(b)
+    img[:, :, 1] = cl2 * g_coeff / np.mean(g)
+    img[:, :, 2] = cl3 * r_coeff / np.mean(r)
 
     return img
 
