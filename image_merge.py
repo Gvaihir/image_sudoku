@@ -1,16 +1,3 @@
-"""testing basic image processing functions
-
-
-x - sample
-b - channel in blue
-b_coeff -
-g - channel in green
-g_coeff
-r - channel in red
-r_coeff
-workDir - working directory
-"""
-
 import cv2
 import numpy as np
 import os
@@ -29,12 +16,47 @@ parser.add_argument('--wd', default = os.getcwd(), help='directory with images. 
 parser.add_argument('--b_coeff', default = 1, type=float, help='FLOAT Pixel intensity decrease: PI\' = PI * b_coeff / Mean(channel intensity) (Default: 1)')
 parser.add_argument('--g_coeff', default = 1, type=float, help='FLOAT Pixel intensity decrease: PI\' = PI * g_coeff / Mean(channel intensity) (Default: 1)')
 parser.add_argument('--r_coeff', default = 1, type=float, help='FLOAT Pixel intensity decrease: PI\' = PI * r_coeff / Mean(channel intensity) (Default: 1)')
-parser.add_argument('--tile', default = 256, type=int, help='INT Dimension of a tile for segmentation')
+parser.add_argument('--tile', default = 256, type=int, help='INT Size of a tile for splitting')
 
 if len(sys.argv)==1:
     parser.print_help(sys.stderr)
     sys.exit(1)
 argsP = parser.parse_args()
+
+
+
+# splitting and CLAHE correction function
+def split_func(x, tile):
+    # exclusion of pixels on the edges for even split of the image
+    dim_0_index = list(range(int((x.shape[0] - x.shape[0] // tile * tile) / 2),
+                             int((x.shape[0] + x.shape[0] // tile * tile) / 2)))
+
+    dim_1_index = list(range(int((x.shape[1] - x.shape[1] // tile * tile) / 2),
+                             int((x.shape[1] + x.shape[1] // tile * tile) / 2)))
+
+    # delete edges
+    x_rm_edges = x[dim_0_index, :][:, dim_1_index]
+
+    # new dimensions
+    x_dim0, x_dim1 = x_rm_edges.shape[0], x_rm_edges.shape[1]
+
+    # create new list for all tiles
+    list_tiles = []
+
+    # split into equal tiles
+    for j in range(0, x_dim0, tile):
+        for k in range(0, x_dim1, tile):
+            j1 = j + tile
+            k1 = k + tile
+            tiles = x_rm_edges[j:j1, k:k1]
+            cl_tiles = clahe.apply(tiles)
+            list_tiles.append(cl_tiles)
+
+    return list_tiles
+
+
+
+
 
 
 # merge function
@@ -48,9 +70,9 @@ def channel_merge(x, b, b_coeff, g, g_coeff, r, r_coeff, workDir):
 
     # combine channels
     img = np.zeros((b.shape[0], b.shape[1], 3))
-    img[:, :, 0] = cl1 * b_coeff / np.mean(b)
-    img[:, :, 1] = cl2 * g_coeff / np.mean(g)
-    img[:, :, 2] = cl3 * r_coeff / np.mean(r)
+    img[:, :, 0] = cl1 * b_coeff / np.mean(np.ma.masked_where(b < 255, b))
+    img[:, :, 1] = cl2 * g_coeff / np.mean(np.ma.masked_where(g < 255, g))
+    img[:, :, 2] = cl3 * r_coeff / np.mean(np.ma.masked_where(r < 255, r))
 
     return img
 
@@ -84,7 +106,9 @@ if __name__ == "__main__":
         g = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains('ch2'), 'Name'].to_string(index=False)]), -1)
         r = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains('ch3'), 'Name'].to_string(index=False)]), -1)
 
-        # perform main func
+
+
+        # perform merge func
         img = channel_merge(x=x, b=b, b_coeff=argsP.b_coeff, g=g, g_coeff=argsP.g_coeff, r=r, r_coeff=argsP.r_coeff,
                       workDir=argsP.wd)
 
