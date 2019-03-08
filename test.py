@@ -16,9 +16,7 @@ parser.add_argument('--wd', default = os.getcwd(), help='directory with images. 
 parser.add_argument('--b_coeff', default = 1, type=float, help='FLOAT Pixel intensity decrease: PI\' = PI * b_coeff / Mean(channel intensity) (Default: 1)')
 parser.add_argument('--g_coeff', default = 1, type=float, help='FLOAT Pixel intensity decrease: PI\' = PI * g_coeff / Mean(channel intensity) (Default: 1)')
 parser.add_argument('--r_coeff', default = 1, type=float, help='FLOAT Pixel intensity decrease: PI\' = PI * r_coeff / Mean(channel intensity) (Default: 1)')
-parser.add_argument('--tile', default = 256, type=int, help='INT Size of a tile for splitting')
-parser.add_argument('--ntiles', default = 4, type=int, help='INT Number of tiles to split into. Default = 4 (each image will be split into 4)')
-
+#parser.add_argument('--tile', default = 256, type=int, help='INT Dimension of a tile for segmentation')
 
 if len(sys.argv)==1:
     parser.print_help(sys.stderr)
@@ -26,15 +24,20 @@ if len(sys.argv)==1:
 argsP = parser.parse_args()
 
 
-
 # merge function
-def channels_array(b, g, r):
+def channel_merge(x, b, b_coeff, g, g_coeff, r, r_coeff, workDir):
+
+    # adaptive equalizing
+    clahe = cv2.createCLAHE(clipLimit=4.0, tileGridSize=(32, 32))
+    cl1 = clahe.apply(b)
+    cl2 = clahe.apply(g)
+    cl3 = clahe.apply(r)
 
     # combine channels
     img = np.zeros((b.shape[0], b.shape[1], 3))
-    img[:, :, 0] = b
-    img[:, :, 1] = g
-    img[:, :, 2] = r
+    img[:, :, 0] = cl1 * b_coeff / np.mean(np.ma.masked_where(b < 255, b))
+    img[:, :, 1] = cl2 * g_coeff / np.mean(np.ma.masked_where(g < 255, g))
+    img[:, :, 2] = cl3 * r_coeff / np.mean(np.ma.masked_where(r < 255, r))
 
     return img
 
@@ -53,8 +56,7 @@ if __name__ == "__main__":
     if not os.path.exists(outPath):
         os.makedirs(outPath)
 
-    # make clahe function
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(4, 4))
+
 
     # split file name, extract sample name
     dfDir["Sample"] = dfDir["Name"].str.split('-', expand=True)[0]
@@ -69,12 +71,9 @@ if __name__ == "__main__":
         g = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains('ch2'), 'Name'].to_string(index=False)]), -1)
         r = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains('ch3'), 'Name'].to_string(index=False)]), -1)
 
-        # work on different channels
-        b_split_clahe = split_func(x=b, ntiles=argsP.ntiles, tile=argsP.tile, clahe=clahe)
-        g_split_clahe = split_func(x=g, ntiles=argsP.ntiles, tile=argsP.tile, clahe=clahe)
-        r_split_clahe = split_func(x=r, ntiles=argsP.ntiles, tile=argsP.tile, clahe=clahe)
-
-        # perform split and correct function
+        # perform main func
+        img = channel_merge(x=x, b=b, b_coeff=argsP.b_coeff, g=g, g_coeff=argsP.g_coeff, r=r, r_coeff=argsP.r_coeff,
+                      workDir=argsP.wd)
 
         # write image
         cv2.imwrite("".join(["/".join([outPath, x]), ".tif"]), img)
