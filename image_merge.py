@@ -2,12 +2,13 @@ import cv2
 import numpy as np
 import os
 import pandas as pd
+import re
 import glob
 import sys
 import argparse
 from argparse import RawTextHelpFormatter
 from image_bin import split_func
-import pp_combine_export
+from pp_combine_export import pp_combine_export
 
 
 parser = argparse.ArgumentParser(
@@ -15,12 +16,12 @@ parser = argparse.ArgumentParser(
     formatter_class=RawTextHelpFormatter,
     epilog="""Merge wisely""")
 parser.add_argument('--wd', default = os.getcwd(), help='directory with images. Default - WD')
-parser.add_argument('--b_coeff', default = 1, type=float, help='FLOAT Pixel intensity decrease: PI\' = PI * b_coeff / Mean(channel intensity) (Default: 1)')
-parser.add_argument('--g_coeff', default = 1, type=float, help='FLOAT Pixel intensity decrease: PI\' = PI * g_coeff / Mean(channel intensity) (Default: 1)')
-parser.add_argument('--r_coeff', default = 1, type=float, help='FLOAT Pixel intensity decrease: PI\' = PI * r_coeff / Mean(channel intensity) (Default: 1)')
+parser.add_argument('--b_coeff', default = 1, type=float, help='FLOAT Pixel intensity coefficient: PI\' = 8bitPI * b_coeff (Default: 1)')
+parser.add_argument('--g_coeff', default = 1, type=float, help='FLOAT Pixel intensity coefficient: PI\' = 8bitPI * g_coeff (Default: 1)')
+parser.add_argument('--r_coeff', default = 1, type=float, help='FLOAT Pixel intensity coefficient: PI\' = 8bitPI * r_coeff (Default: 1)')
 parser.add_argument('--tile_size', default = 256, type=int, help='INT Size of a tile for splitting')
 parser.add_argument('--ntiles', default = 4, type=int, help='INT Number of tiles to split into. Default = 4 (each image will be split into 4)')
-
+parser.add_argument('--selection', default = None, type=str, help='Select specific portions of the screen. Accepts tab delimited list of plates/wells. See samplesheet. Default = NONE')
 
 if len(sys.argv)==1:
     parser.print_help(sys.stderr)
@@ -60,6 +61,18 @@ if __name__ == "__main__":
 
     # split file name, extract sample name
     dfDir["Sample"] = dfDir["Name"].str.split('-', expand=True)[0]
+    dfDir["Sample_selection"] = dfDir["Sample"].str.split('f', expand=True)[0]
+    # use selection ?
+    if argsP.selection != None:
+        selection_df = pd.read_csv(argsP.selection, sep='\t')
+        selection_df['well_row'] = 'r' + selection_df['well'].replace(r'\d', '', regex=True).apply(lambda x: ord(x)-64).apply(lambda x: format(x, '02d'))
+        selection_df['well_col'] = 'c' + selection_df['well'].replace(r'\D', '', regex=True).astype(int).apply(lambda x: format(x, '02d'))
+        selection_df['sample'] = selection_df['well_row'].str.cat(selection_df['well_col'])
+
+        # subset dfDir using only sample names from selection
+        dfDir = dfDir[dfDir["Sample_selection"].isin(selection_df['sample'])]
+
+
 
     # loop over each sample
     for num, x in enumerate(dfDir["Sample"].unique()):
@@ -78,6 +91,6 @@ if __name__ == "__main__":
         r_split_clahe = split_func(x=r, ntiles=argsP.ntiles, tile_size=argsP.tile_size, clahe=clahe)
 
         pp_combine_export(b_list=b_split_clahe, g_list=g_split_clahe, r_list=r_split_clahe,
-                          b_coeff=argsP.b_coeff, g_coeff=argsP.g_coeff, r_coeff=r_coeff,
-                          wdir=outPath, imName=x)
+                          b_coeff=argsP.b_coeff, g_coeff=argsP.g_coeff, r_coeff=argsP.r_coeff,
+                          outpath=outPath, imName=x)
 

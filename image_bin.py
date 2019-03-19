@@ -1,3 +1,6 @@
+import cv2
+
+
 # splitting and CLAHE correction function
 def split_func(x, ntiles, tile_size, clahe):
 
