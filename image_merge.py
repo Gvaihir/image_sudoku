@@ -6,6 +6,8 @@ import glob
 import sys
 import argparse
 from argparse import RawTextHelpFormatter
+from image_bin import split_func
+import pp_combine_export
 
 
 parser = argparse.ArgumentParser(
@@ -16,7 +18,7 @@ parser.add_argument('--wd', default = os.getcwd(), help='directory with images. 
 parser.add_argument('--b_coeff', default = 1, type=float, help='FLOAT Pixel intensity decrease: PI\' = PI * b_coeff / Mean(channel intensity) (Default: 1)')
 parser.add_argument('--g_coeff', default = 1, type=float, help='FLOAT Pixel intensity decrease: PI\' = PI * g_coeff / Mean(channel intensity) (Default: 1)')
 parser.add_argument('--r_coeff', default = 1, type=float, help='FLOAT Pixel intensity decrease: PI\' = PI * r_coeff / Mean(channel intensity) (Default: 1)')
-parser.add_argument('--tile', default = 256, type=int, help='INT Size of a tile for splitting')
+parser.add_argument('--tile_size', default = 256, type=int, help='INT Size of a tile for splitting')
 parser.add_argument('--ntiles', default = 4, type=int, help='INT Number of tiles to split into. Default = 4 (each image will be split into 4)')
 
 
@@ -70,11 +72,12 @@ if __name__ == "__main__":
         r = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains('ch3'), 'Name'].to_string(index=False)]), -1)
 
         # work on different channels
-        b_split_clahe = split_func(x=b, ntiles=argsP.ntiles, tile=argsP.tile, clahe=clahe)
-        g_split_clahe = split_func(x=g, ntiles=argsP.ntiles, tile=argsP.tile, clahe=clahe)
-        r_split_clahe = split_func(x=r, ntiles=argsP.ntiles, tile=argsP.tile, clahe=clahe)
-
         # perform split and correct function
+        b_split_clahe = split_func(x=b, ntiles=argsP.ntiles, tile_size=argsP.tile_size, clahe=clahe)
+        g_split_clahe = split_func(x=g, ntiles=argsP.ntiles, tile_size=argsP.tile_size, clahe=clahe)
+        r_split_clahe = split_func(x=r, ntiles=argsP.ntiles, tile_size=argsP.tile_size, clahe=clahe)
 
-        # write image
-        cv2.imwrite("".join(["/".join([outPath, x]), ".tif"]), img)
+        pp_combine_export(b_list=b_split_clahe, g_list=g_split_clahe, r_list=r_split_clahe,
+                          b_coeff=argsP.b_coeff, g_coeff=argsP.g_coeff, r_coeff=r_coeff,
+                          wdir=outPath, imName=x)
+
