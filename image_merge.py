@@ -9,6 +9,7 @@ import argparse
 from argparse import RawTextHelpFormatter
 from image_bin import split_func
 from pp_combine_export import pp_combine_export
+from pp_edge_detect import pp_edge_detect
 
 
 parser = argparse.ArgumentParser(
@@ -21,6 +22,8 @@ parser.add_argument('--g_coeff', default = 1, type=float, help='FLOAT Pixel inte
 parser.add_argument('--r_coeff', default = 1, type=float, help='FLOAT Pixel intensity coefficient: PI\' = 8bitPI * r_coeff (Default: 1)')
 parser.add_argument('--tile_size', default = 256, type=int, help='INT Size of a tile for splitting')
 parser.add_argument('--ntiles', default = 4, type=int, help='INT Number of tiles to split into. Default = 4 (each image will be split into 4)')
+parser.add_argument('--edge_red', default = False, type=bool, help='Option to perform LoG on red channel. Default = False')
+parser.add_argument('--laplace_kernel', default = 3, type=int, help='Kernel for LoG. Has to be odd. Default = 3')
 parser.add_argument('--selection', default = None, type=str, help='Select specific portions of the screen. Accepts tab delimited list of plates/wells. See samplesheet. Default = NONE')
 
 if len(sys.argv)==1:
@@ -84,13 +87,19 @@ if __name__ == "__main__":
         g = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains('ch2'), 'Name'].to_string(index=False)]), -1)
         r = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains('ch3'), 'Name'].to_string(index=False)]), -1)
 
+
         # work on different channels
         # perform split and correct function
-        b_split_clahe = split_func(x=b, ntiles=argsP.ntiles, tile_size=argsP.tile_size, clahe=clahe)
-        g_split_clahe = split_func(x=g, ntiles=argsP.ntiles, tile_size=argsP.tile_size, clahe=clahe)
-        r_split_clahe = split_func(x=r, ntiles=argsP.ntiles, tile_size=argsP.tile_size, clahe=clahe)
+        b = split_func(x=b, ntiles=argsP.ntiles, tile_size=argsP.tile_size, clahe=clahe)
+        g = split_func(x=g, ntiles=argsP.ntiles, tile_size=argsP.tile_size, clahe=clahe)
+        r = split_func(x=r, ntiles=argsP.ntiles, tile_size=argsP.tile_size, clahe=clahe)
 
-        pp_combine_export(b_list=b_split_clahe, g_list=g_split_clahe, r_list=r_split_clahe,
+        # detect edges
+        if argsP.edge_red:
+            r = pp_edge_detect(x=r, ddepth=cv2.CV_16U, kernel_size=argsP.laplace_kernel)
+
+
+        pp_combine_export(b_list=b, g_list=g, r_list=r,
                           b_coeff=argsP.b_coeff, g_coeff=argsP.g_coeff, r_coeff=argsP.r_coeff,
                           outpath=outPath, imName=x)
 
