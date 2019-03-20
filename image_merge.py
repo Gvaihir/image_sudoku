@@ -22,9 +22,9 @@ parser.add_argument('--g_coeff', default = 1, type=float, help='FLOAT Pixel inte
 parser.add_argument('--r_coeff', default = 1, type=float, help='FLOAT Pixel intensity coefficient: PI\' = 8bitPI * r_coeff (Default: 1)')
 parser.add_argument('--tile_size', default = 256, type=int, help='INT Size of a tile for splitting')
 parser.add_argument('--ntiles', default = 4, type=int, help='INT Number of tiles to split into. Default = 4 (each image will be split into 4)')
-parser.add_argument('--edge_red', default = False, type=bool, help='Option to perform LoG on red channel. Default = False')
-parser.add_argument('--laplace_kernel', default = 3, type=int, help='Kernel for LoG. Has to be odd. Default = 3')
-parser.add_argument('--selection', default = None, type=str, help='Select specific portions of the screen. Accepts tab delimited list of plates/wells. See samplesheet. Default = NONE')
+parser.add_argument('--edge_red', default = False, type=bool, help='BOOL Option to perform LoG on red channel. Default = False')
+parser.add_argument('--laplace_kernel', default = 3, type=int, help='INT Kernel for LoG. Has to be odd. Default = 3')
+parser.add_argument('--selection', default = None, type=str, help='STR Select specific portions of the screen. Accepts tab delimited list of plates/wells. See samplesheet. Default = NONE')
 
 if len(sys.argv)==1:
     parser.print_help(sys.stderr)
