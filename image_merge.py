@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 import os
 import pandas as pd
-import re
 import glob
 import sys
 import argparse
@@ -10,7 +9,7 @@ from argparse import RawTextHelpFormatter
 from image_bin import split_func
 from pp_combine_export import pp_combine_export
 from pp_edge_detect import pp_edge_detect
-
+from histo_match import hist_match
 
 parser = argparse.ArgumentParser(
     description='''Program to merge fluorescent image channels and prepare for segmentation''',
@@ -30,19 +29,6 @@ if len(sys.argv)==1:
     parser.print_help(sys.stderr)
     sys.exit(1)
 argsP = parser.parse_args()
-
-
-
-# merge function
-def channels_array(b, g, r):
-
-    # combine channels
-    img = np.zeros((b.shape[0], b.shape[1], 3))
-    img[:, :, 0] = b
-    img[:, :, 1] = g
-    img[:, :, 2] = r
-
-    return img
 
 
 # ignoring hidden files
@@ -93,6 +79,7 @@ if __name__ == "__main__":
         b = split_func(x=b, ntiles=argsP.ntiles, tile_size=argsP.tile_size, clahe=clahe)
         g = split_func(x=g, ntiles=argsP.ntiles, tile_size=argsP.tile_size, clahe=clahe)
         r = split_func(x=r, ntiles=argsP.ntiles, tile_size=argsP.tile_size, clahe=clahe)
+
 
         # detect edges
         if argsP.edge_red:

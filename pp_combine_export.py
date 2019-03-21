@@ -4,7 +4,29 @@ import os
 
 
 def pp_combine_export(b_list, g_list, r_list, b_coeff, g_coeff, r_coeff, outpath, imName):
+    '''
 
+    function to combine and export final image in 8 it format
+
+     Arguments:
+    -----------
+        b_list, g_list, r_list: lists of 2D np.ndarray's
+            list of 2D arrays (output of image_bin function), blue, green and red channels
+
+        b_coeff, g_coeff, r_coeff: int
+            coefficient of intensity for each channel
+
+        outpath: str
+            directory to save images to
+
+        imName: str
+            image name
+
+    Returns:
+    -----------
+    void. Writes images within function
+
+    '''
     for i in range(0, len(b_list)):
         # make blank image
         img = np.zeros((b_list[i].shape[0], b_list[i].shape[1], 3))
