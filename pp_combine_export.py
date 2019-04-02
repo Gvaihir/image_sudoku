@@ -37,7 +37,7 @@ def pp_combine_export(b_list, g_list, r_list, b_coeff, g_coeff, r_coeff, outpath
         cv2.imwrite(os.path.join(outpath, "_".join([imName, '{0:02d}.tif'.format(i)])), img)
 
 
-def pp_combine_export_grey(b_list, g_list, r_list, b_coeff, g_coeff, r_coeff, outpath, imName):
+def pp_combine_export_grey(b_list, b_coeff, outpath, imName):
     '''
 
     function to combine and export final image in 8 bit format for single channel images
