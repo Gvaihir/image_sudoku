@@ -15,7 +15,7 @@ parser = argparse.ArgumentParser(
     epilog="""Merge wisely""")
 parser.add_argument('--wd', default = os.getcwd(), help='directory with images. Default - WD')
 parser.add_argument('--coeff', default = 1, type=float, help='FLOAT Pixel intensity coefficient: PI\' = 8bitPI * coeff (Default: 1)')
-parser.add_argument('--channel', default = ch1, choices=['ch1', 'ch2', 'ch3'], help='STR Channel name which to extract. Accepted values: ch1, ch2, ch3')
+parser.add_argument('--channel', default = 'ch1', choices=['ch1', 'ch2', 'ch3'], help='STR Channel name which to extract. Accepted values: ch1, ch2, ch3')
 parser.add_argument('--tile_size', default = 256, type=int, help='INT Size of a tile for splitting')
 parser.add_argument('--ntiles', default = 4, type=int, help='INT Number of tiles to split into. Default = 4 (each image will be split into 4)')
 parser.add_argument('--selection', default = None, type=str, help='STR Select specific portions of the screen. Accepts tab delimited list of plates/wells. See samplesheet. Default = NONE')
