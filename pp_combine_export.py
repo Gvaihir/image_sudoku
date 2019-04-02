@@ -6,7 +6,7 @@ import os
 def pp_combine_export(b_list, g_list, r_list, b_coeff, g_coeff, r_coeff, outpath, imName):
     '''
 
-    function to combine and export final image in 8 it format
+    function to combine and export final image in 8 bit format
 
      Arguments:
     -----------
@@ -37,3 +37,33 @@ def pp_combine_export(b_list, g_list, r_list, b_coeff, g_coeff, r_coeff, outpath
         cv2.imwrite(os.path.join(outpath, "_".join([imName, '{0:02d}.tif'.format(i)])), img)
 
 
+def pp_combine_export_grey(b_list, g_list, r_list, b_coeff, g_coeff, r_coeff, outpath, imName):
+    '''
+
+    function to combine and export final image in 8 bit format for single channel images
+
+     Arguments:
+    -----------
+        b_list: lists of 2D np.ndarray's
+            list of 2D arrays (output of image_bin function)
+
+        b_coeff: int
+            coefficient of intensity for the channel
+
+        outpath: str
+            directory to save images to
+
+        imName: str
+            image name
+
+    Returns:
+    -----------
+    void. Writes images within function
+
+    '''
+    for i in range(0, len(b_list)):
+        # make blank image
+        img = b_list[i]/(b_list[i].max()/255.0)*b_coeff
+
+
+        cv2.imwrite(os.path.join(outpath, "_".join([imName, '{0:02d}.tif'.format(i)])), img)

@@ -7,6 +7,7 @@ import numpy as np
 import argparse
 from argparse import RawTextHelpFormatter
 from glob import glob
+import cv2
 
 
 # pip
@@ -38,12 +39,13 @@ argsP = parser.parse_args()
 
 if __name__ == "__main__":
     X = sorted(glob(os.path.join(argsP_img, '*.tif')))
-    X = list(map(imread, X))
+    X = list(map(cv2.imread, X))
 
     n_channel = 1 if X[0].ndim == 2 else X[0].shape[-1]
 
     # Normalize images and fill small label holes
-    axis_norm = (0, 1)  # normalize channels independently
+    # axis_norm = (0,1)   # normalize channels independently
+    axis_norm = (0, 1, 2)  # normalize channels jointly
     if n_channel > 1:
         print(f"Normalizing image channels {'jointly' if axis_norm is None or 2 in axis_norm else 'independently'}.")
         sys.stdout.flush()
@@ -52,6 +54,17 @@ if __name__ == "__main__":
     # load models
     bname = os.path.basename(os.path.dirname(argsP.model))
     model = StarDist(None, name=argsP.model, basedir=bname)
+
+    img = normalize(X[16], 1, 99.8, axis=axis_norm)
+
+    prob, dist = model.predict(img)
+
+    coord = dist_to_coord(dist)
+
+    points = non_maximum_suppression(coord, prob, prob_thresh=0.4)
+
+    labels = polygons_to_label(coord, prob, points)
+    print('------------------')
 
     # Prediction
     img = normalize(X[16], 1, 99.8, axis=axis_norm)
