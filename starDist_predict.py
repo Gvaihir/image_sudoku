@@ -29,6 +29,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('--img', default=os.path.join(os.getcwd(), 'img'), help='directory with images. Default - WD/img')
 parser.add_argument('--model', default=os.path.join(os.getcwd(), 'models', 'stardist_no_shape_completion'),
                     help='directory with models. Default - WD/models/stardist_no_shape_completion')
+parser.add_argument('-channels', default=os.path.join(os.getcwd(), 'predicted_masks'), help='output dir. Default - WD/predicted_masks')
 parser.add_argument('-o', default=os.path.join(os.getcwd(), 'predicted_masks'), help='output dir. Default - WD/predicted_masks')
 
 if len(sys.argv)==1:
@@ -44,8 +45,8 @@ if __name__ == "__main__":
     n_channel = 1 if X[0].ndim == 2 else X[0].shape[-1]
 
     # Normalize images and fill small label holes
-    # axis_norm = (0,1)   # normalize channels independently
-    axis_norm = (0, 1, 2)  # normalize channels jointly
+    axis_norm = (0,1)   # normalize channels independently
+    #axis_norm = (0, 1, 2)  # normalize channels jointly
     if n_channel > 1:
         print(f"Normalizing image channels {'jointly' if axis_norm is None or 2 in axis_norm else 'independently'}.")
         sys.stdout.flush()
