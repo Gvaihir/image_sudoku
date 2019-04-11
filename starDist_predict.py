@@ -24,7 +24,9 @@ lbl_cmap = random_label_cmap()
 
 # arguments
 parser = argparse.ArgumentParser(
-    description='''Prediction with trained model''', formatter_class=RawTextHelpFormatter,
+    description='''A module predicts centroids, masks and crops images of certain size. There is an option to 
+    skip the centroids if their coordinates closer to the previously analyzed centroid then a certain value''',
+    formatter_class=RawTextHelpFormatter,
     epilog='''Predict wisely''')
 parser.add_argument('--img', default=os.path.join(os.getcwd(), 'img'), help='directory with images. Default - WD/img')
 parser.add_argument('--model', default=os.path.join(os.getcwd(), 'models', 'stardist_no_shape_completion'),
