@@ -33,7 +33,7 @@ argsP = parser.parse_args()
 
 # ignoring hidden files
 def listdir_nohidden(path):
-    return [os.path.basename(x) for x in glob.glob(os.path.join(path, '*'))]
+    return [os.path.basename(x) for x in glob.glob(os.path.join(path, '*.tiff'))]
 
 
 if __name__ == "__main__":
