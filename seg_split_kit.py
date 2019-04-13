@@ -18,6 +18,12 @@ from stardist import random_label_cmap, draw_polygons, sample_points
 from stardist import Config, StarDist
 from starDist_predict import stardist_predict
 
+
+# custom
+from polygon_surface import PolyArea
+from starDist_predict import stardist_predict
+
+
 np.random.seed(6)
 lbl_cmap = random_label_cmap()
 
@@ -29,7 +35,7 @@ parser = argparse.ArgumentParser(
     formatter_class=RawTextHelpFormatter,
     epilog='''Predict wisely''')
 parser.add_argument('--img', default=os.path.join(os.getcwd(), 'img'), help='directory with images. Default - WD/img')
-parser.add_argument('--model', default=os.path.join(os.getcwd(), 'models', 'stardist_no_shape_completion'),
+parser.add_argument('--model', default=os.path.join(os.getcwd(), 'models'),
                     help='directory with models. Default - WD/models/stardist_no_shape_completion')
 parser.add_argument('-channels', default=os.path.join(os.getcwd(), 'predicted_masks'), help='output dir. Default - WD/predicted_masks')
 parser.add_argument('-o', default=os.path.join(os.getcwd(), 'predicted_masks'), help='output dir. Default - WD/predicted_masks')
@@ -45,8 +51,14 @@ if __name__ == "__main__":
     X = sorted(glob(os.path.join(argsP_img, '*.tif')))
     X = list(map(cv2.imread, X))
 
+    model = StarDist(None, name='stardist_no_shape_completion', basedir=argsP.model)
     # ##### PREDICT ######
+    coord, point = stardist_predict(X, model=model, size=72, prob_thresh=0.7)
 
+    # exclude points based on the polygon surface
+    area = point
+
+    # remove points too close to each other
 
 
 

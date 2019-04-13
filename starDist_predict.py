@@ -18,7 +18,10 @@ from stardist import dist_to_coord, non_maximum_suppression
        model: class StarDist model
 
        prob_thresh: float
-           probability 
+           probability for stardist coordinate prediction
+           
+        nms_thresh: float
+            threshold for stardist non maximum suppression
 
    Returns:
    -----------
@@ -27,7 +30,7 @@ from stardist import dist_to_coord, non_maximum_suppression
    '''
 
 
-def stardist_predict(x, model, prob_thresh=0.5, size, coef_dist=0.5):
+def stardist_predict(x, model, size, prob_thresh=0.5, coef_dist=0.5, nms_thresh=0.5):
 
     # Normalize images and fill small label holes
     axis_norm = (0, 1)  # normalize channels independently
@@ -43,9 +46,9 @@ def stardist_predict(x, model, prob_thresh=0.5, size, coef_dist=0.5):
     coord = dist_to_coord(dist)
 
     # Perform non-maximum suppression for polygons above object probability threshold
-    points = non_maximum_suppression(coord, prob, prob_thresh=prob_thresh, b=size*coef_dist)
+    points = non_maximum_suppression(coord, prob, prob_thresh=prob_thresh, b=int(size*coef_dist), nms_thresh=nms_thresh)
 
-    return points
+    return coord, points
 
 
 
