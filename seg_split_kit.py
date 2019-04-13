@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
     model = StarDist(None, name='stardist_no_shape_completion', basedir=argsP.model)
     # ##### PREDICT ######
-    coord, point = stardist_predict(X, model=model, size=72, prob_thresh=0.7)
+    coord, point = stardist_predict(X, model=model, size=72, prob_thresh=0.7, nms_thresh=0.7)
 
     # exclude points based on the polygon surface
     area = point
