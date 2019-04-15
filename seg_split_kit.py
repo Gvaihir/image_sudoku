@@ -22,9 +22,9 @@ from starDist_predict import stardist_predict
 
 
 # custom
-from polygon_surface import PolyArea
 from starDist_predict import stardist_predict, PolyArea
 from clust_centroid import dbscan_alg, find_medoid
+from singleCell_export import slice_export
 
 np.random.seed(6)
 lbl_cmap = random_label_cmap()
@@ -91,6 +91,13 @@ if __name__ == "__main__":
 
         # append both lists
         points_final = points_filt + point_clust
+
+        # split and export single cells
+        for j in range(0, len(points_final)):
+            crop_img = slice_export(img = X[i], points=points_final[j], size = 70)
+
+            # export
+            cv2.imwrite(os.path.join(outpath, "_".join([imName, '{0:02d}.tif'.format(i)])), img)
 
 
 
