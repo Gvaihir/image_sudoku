@@ -24,7 +24,7 @@ from starDist_predict import stardist_predict
 # custom
 from polygon_surface import PolyArea
 from starDist_predict import stardist_predict, PolyArea
-from clust_centroid import dbscan_alg
+from clust_centroid import dbscan_alg, find_medoid
 
 np.random.seed(6)
 lbl_cmap = random_label_cmap()
@@ -70,7 +70,7 @@ if __name__ == "__main__":
     model = StarDist(None, name='stardist_no_shape_completion', basedir=argsP.model)
 
     ###### PREDICT FOR EACH IMAGE ######
-    for i in range(0, len(X)+1):
+    for i in range(0, len(X)):
         coord, points = stardist_predict(X[i], model=model, size=72, prob_thresh=0.7, nms_thresh=0.7)
 
         # exclude points based on the polygon surface
@@ -81,10 +81,16 @@ if __name__ == "__main__":
         points = [points[x] for x in range(len(points)) if area[x] > 100]
 
         # perform DBSCAN algorithm
-        labels = dbscan_alg(points=points, eps=15, min_samples=2)
+        labels = dbscan_alg(points=points, eps=30, min_samples=2)
 
         # get individual points, which have no cluster
         points_filt = [points[x] for x in range(len(points)) if labels[x] == -1]
+
+        # get medoid points for clusters
+        point_clust = [find_medoid(x, points=points, labels=labels) for x in list(set(labels[labels != -1]))]
+
+        # append both lists
+        points_final = points_filt + point_clust
 
 
 

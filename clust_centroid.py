@@ -1,4 +1,5 @@
 from sklearn.cluster import DBSCAN
+from sklearn import metrics
 
 
 '''
@@ -34,7 +35,9 @@ def dbscan_alg(points, eps=15, min_samples=2):
 
 
 def find_medoid(cluster, points, labels):
-
+    rel_points = [points[x] for x in range(len(points)) if labels[x] == cluster]
+    pwdist = metrics.pairwise_distances(rel_points)
+    return rel_points[np.argmin(pwdist.sum(axis=1))]
 
 
 
