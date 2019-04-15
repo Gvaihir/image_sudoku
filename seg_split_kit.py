@@ -13,12 +13,8 @@ import pandas as pd
 
 
 # pip
-from csbdeep.utils import Path, normalize
-from skimage.segmentation import find_boundaries
-from stardist import dist_to_coord, non_maximum_suppression, polygons_to_label
-from stardist import random_label_cmap, draw_polygons, sample_points
-from stardist import Config, StarDist
-from starDist_predict import stardist_predict
+from stardist import random_label_cmap
+from stardist import StarDist
 
 
 # custom

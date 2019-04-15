@@ -31,6 +31,26 @@ def dbscan_alg(points, eps=15, min_samples=2):
     return labels
 
 
+'''
+
+   function to find medoid of a cluster
+
+    Arguments:
+   -----------
+       cluster: int 
+           cluster number currently analyzed
+
+        points: list of arrays 
+            coordinated of StarDist predicted centroids of polygons
+
+        labels: list of int
+            list of clusters for each centroids, predicted by DBSCAN
+
+   Returns:
+   -----------
+   list - cluster labels for each centroid
+
+   '''
 
 
 
