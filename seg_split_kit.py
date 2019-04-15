@@ -43,8 +43,7 @@ parser.add_argument('--pt', default = 1, type=int, help='Plate number. Default -
 parser.add_argument('--rnd', default = False, type=bool, help='Select subset of images per well? Default - FALSE')
 parser.add_argument('--rnd_numb', default = 10, type=int, help='Number of images to select from well. Use with --rnd=True'
                                                                ' Default - 10')
-parser.add_argument('-channels', default=os.path.join(os.getcwd(), 'predicted_masks'), help='output dir. Default - WD/predicted_masks')
-parser.add_argument('-o', default=os.path.join(os.getcwd(), 'predicted_masks'), help='output dir. Default - WD/predicted_masks')
+parser.add_argument('--out', default=os.path.join(os.getcwd(), 'cropped'), help='output dir. Default - WD/cropped')
 
 if len(sys.argv)==1:
     parser.print_help(sys.stderr)
@@ -97,30 +96,7 @@ if __name__ == "__main__":
             crop_img = slice_export(img = X[i], points=points_final[j], size = 70)
 
             # export
-            cv2.imwrite(os.path.join(outpath, "_".join([imName, '{0:02d}.tif'.format(i)])), img)
-
-
-
-
-
-
-
-    # remove points too close to each other
-
-
-
-
-
-
-
-
-
-    # load models
-    bname = os.path.basename(os.path.dirname(argsP.model))
-    model = StarDist(None, name=argsP.model, basedir=bname)
-
-
-
-
-
+            cv2.imwrite(os.path.join(argsP.out, "_".join(['Pt{0:02d}'.format(argsP.pt),
+                                                          X_names['base'][i],
+                                                          '{0:04d}.tif'.format(j)])), img)
 
