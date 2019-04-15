@@ -51,7 +51,29 @@ def stardist_predict(x, model, size, prob_thresh=0.5, coef_dist=0.5, nms_thresh=
     return coord, points
 
 
+'''
 
+   function to detect centroids of polygons, uses coord and point from StarDist prediction
+
+    Arguments:
+   -----------
+       point: 1D array 
+           x,y coordinates of the pixel (centroid)
+        
+        coord 4D array 
+            xy coordinates for each of 32 vertexes associated with each point
+
+   Returns:
+   -----------
+   float - surface area of the polygon.
+
+   '''
+
+
+
+def PolyArea(point, coord):
+    x, y = coord[point[0], point[1], 1], coord[point[0], point[1], 0]
+    return 0.5*np.abs(np.dot(x,np.roll(y,1))-np.dot(y,np.roll(x,1)))
 
 
 
