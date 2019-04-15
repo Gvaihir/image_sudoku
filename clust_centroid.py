@@ -48,7 +48,7 @@ def dbscan_alg(points, eps=15, min_samples=2):
 
    Returns:
    -----------
-   list - cluster labels for each centroid
+   xy coordinates of polygon centroid which is medoid of a cluster 
 
    '''
 

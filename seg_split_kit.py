@@ -9,6 +9,7 @@ from argparse import RawTextHelpFormatter
 from glob import glob
 import cv2
 import pandas as pd
+import matplotlib.pyplot as plt
 
 
 
@@ -25,7 +26,15 @@ from singleCell_export import slice_export
 np.random.seed(6)
 lbl_cmap = random_label_cmap()
 
+# restriction to float for argument '--example_prob'
+def restricted_float(x):
+    x = float(x)
+    if x < 0.00 or x > 1.00:
+        raise argparse.ArgumentTypeError("%r not in range [0.0, 1.0]"%(x,))
+    return x
 
+p = argparse.ArgumentParser()
+p.add_argument("--arg", type=restricted_float)
 # arguments
 parser = argparse.ArgumentParser(
     description='''A module predicts centroids, masks and crops images of certain size. There is an option to 
@@ -39,6 +48,10 @@ parser.add_argument('--pt', default = 1, type=int, help='Plate number. Default -
 parser.add_argument('--rnd', default = False, type=bool, help='Select subset of images per well? Default - FALSE')
 parser.add_argument('--rnd_numb', default = 10, type=int, help='Number of images to select from well. Use with --rnd=True'
                                                                ' Default - 10')
+parser.add_argument('--example', default = False, type=bool, help='Export 25 random examples of cells with area and coordinates?'
+                                                                  'Deafault - FALSE')
+parser.add_argument('--example_prob', default = 0, type=restricted_float, help='For how many images per well get the examples?'
+                                                                    'Works only with --example TRUE. Default - 0')
 parser.add_argument('--out', default=os.path.join(os.getcwd(), 'cropped'), help='output dir. Default - WD/cropped')
 
 if len(sys.argv)==1:
@@ -53,6 +66,10 @@ if __name__ == "__main__":
     # import images
     X_names = pd.DataFrame(sorted(glob(os.path.join(argsP.wd, '*.tif*'))))
     X_names['base'] = X_names.loc[:,0].str.extract(r'(r\d+c\d+)')
+
+    # create output dir
+    if not os.path.exists(argsP.out):
+        os.makedirs(argsP.out)
 
     # random selection?
     if argsP.rnd:
@@ -94,5 +111,27 @@ if __name__ == "__main__":
             # export
             cv2.imwrite(os.path.join(argsP.out, "_".join(['Pt{0:02d}'.format(argsP.pt),
                                                           X_names['base'][i],
-                                                          '{0:04d}.tif'.format(j)])), img)
+                                                          '{0:04d}.tif'.format(j)])), crop_img)
+        # OPTIONAL export of 25 samples
+        if argsP.example:
+
+            # draw 1 or 0 with probability argsP.example_prob
+            if np.random.choice(range(0, 2), p=[1 - argsP.example_prob, argsP.example_prob]) == 1:
+                fig = plt.figure(figsize=(8, 8))
+                columns = 5
+                rows = 5
+                for k in range(1, columns * rows + 1):
+                    p = points_final[np.random.choice(range(1, len(points_final)))]
+                    x, y = coord[p[0], p[1], 1], coord[p[0], p[1], 0]
+                    lol = PolyArea(p, coord)
+                    img_crop = slice_export(img=X[i], points=p, size=70)
+                    fig.add_subplot(rows, columns, i)
+                    plt.text(0, 0, s=lol)
+                    plt.text(8, 8, s=p, color='red')
+                    plt.imshow(img_crop, cmap='gray');
+                    plt.axis('off')
+                plt.savefig(fname=os.path.join(argsP.wd, "_".join(['Pt{0:02d}'.format(argsP.pt),
+                                                                    X_names['base'][i],
+                                                                    '{0:04d}_example.tif'.format(j)])))
+
 
