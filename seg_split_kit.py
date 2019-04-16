@@ -128,7 +128,7 @@ if __name__ == "__main__":
                     x, y = coord[p[0], p[1], 1], coord[p[0], p[1], 0]
                     lol = PolyArea(p, coord)
                     img_crop = slice_export(img=X[i], points=p, size=70)
-                    fig.add_subplot(rows, columns, i)
+                    fig.add_subplot(rows, columns, k)
                     plt.text(0, 0, s=lol)
                     plt.text(8, 8, s=p, color='red')
                     plt.imshow(img_crop, cmap='gray');
