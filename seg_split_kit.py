@@ -92,6 +92,9 @@ if __name__ == "__main__":
         # perform filter by area
         points = [points[x] for x in range(len(points)) if area[x] > 100]
 
+        if len(points) < 10:
+            continue
+
         # perform DBSCAN algorithm
         labels = dbscan_alg(points=points, eps=30, min_samples=2)
 
