@@ -1,5 +1,6 @@
 from sklearn.cluster import DBSCAN
 from sklearn import metrics
+import numpy as np
 
 
 '''
