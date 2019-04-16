@@ -5,6 +5,7 @@ from __future__ import print_function, unicode_literals, absolute_import, divisi
 # pip
 from csbdeep.utils import normalize
 from stardist import dist_to_coord, non_maximum_suppression
+import numpy as np
 
 '''
 
