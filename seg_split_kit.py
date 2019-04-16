@@ -135,6 +135,6 @@ if __name__ == "__main__":
                     plt.axis('off')
                 plt.savefig(fname=os.path.join(argsP.wd, "_".join(['Pt{0:02d}'.format(argsP.pt),
                                                                     X_names['base'][i],
-                                                                    '{0:04d}_example.tif'.format(j)])))
+                                                                    '{0:04d}_example.pdf'.format(j)])))
 
 
