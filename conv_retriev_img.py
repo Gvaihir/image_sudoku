@@ -7,7 +7,6 @@ import argparse
 from argparse import RawTextHelpFormatter
 from glob import glob
 import cv2
-import pandas as pd
 import matplotlib.pyplot as plt
 
 
@@ -20,7 +19,7 @@ parser = argparse.ArgumentParser(
     epilog='''Image wisely''')
 parser.add_argument('--wd', default=os.getcwd(), help='directory with images. Default - WD')
 parser.add_argument('--num', default=1, choices=list(range(1,257)), help='From how many filters to export images. Default - 1')
-parser.add_argument('--seed', default=1, type=int, help='Random seed. Default - 1')
+parser.add_argument('--seed', default=33, type=int, help='Random seed. Default - 33')
 
 
 if len(sys.argv)==1:
@@ -44,13 +43,11 @@ def exp_pdf_act(layer):
     rows = 3
     for num, i in enumerate(glob(os.path.join(layer, '*.tif'))):
         img = cv2.imread(i, -1)
-        fig.add_subplot(rows, columns, num)
+        fig.add_subplot(rows, columns, num+1)
         plt.imshow(img, cmap='gray');
         plt.axis('off')
-        plt.title(os.path.basename(layer))
-    plt.savefig(fname=os.path.join(outPath, "_".join(['Pt{0:02d}'.format(argsP.pt),
-                                                       X_names['base'][i],
-                                                       '{0:04d}_example.pdf'.format(j)])))
+    plt.suptitle(os.path.basename(layer))
+    plt.savefig(fname=os.path.join(outPath, "".join([os.path.basename(layer), '.pdf'])))
 
 
 
@@ -60,12 +57,14 @@ if __name__ == "__main__":
     inDir.sort()
     outPath = '/'.join([os.path.dirname(inPath), "export"])
 
-
-
-    dfDir = pd.DataFrame(inDir, columns=['Name'])
-    outPath = '/'.join([os.path.dirname(inPath), "converted_grey"])
+    # create output dir
     if not os.path.exists(outPath):
         os.makedirs(outPath)
+
+    random_samples = np.random.choice(inDir, argsP.num)
+    [exp_pdf_act(x) for x in random_samples]
+
+
 
 
 
