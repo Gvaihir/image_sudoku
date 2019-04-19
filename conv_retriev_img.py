@@ -11,14 +11,14 @@ import matplotlib.pyplot as plt
 
 
 p = argparse.ArgumentParser()
-p.add_argument("--arg", type=restricted_float)
+
 # arguments
 parser = argparse.ArgumentParser(
     description='''A module for exporting images from convolution layers of deepclust into single pdf for each layer''',
     formatter_class=RawTextHelpFormatter,
     epilog='''Image wisely''')
 parser.add_argument('--wd', default=os.getcwd(), help='directory with images. Default - WD')
-parser.add_argument('--num', default=1, choices=list(range(1,257)), help='From how many filters to export images. Default - 1')
+parser.add_argument('--num', default=1, type=int, help='From how many filters to export images. Default - 1')
 parser.add_argument('--seed', default=33, type=int, help='Random seed. Default - 33')
 
 
@@ -46,6 +46,7 @@ def exp_pdf_act(layer):
         fig.add_subplot(rows, columns, num+1)
         plt.imshow(img, cmap='gray');
         plt.axis('off')
+        plt.title(os.path.basename(i))
     plt.suptitle(os.path.basename(layer))
     plt.savefig(fname=os.path.join(outPath, "".join([os.path.basename(layer), '.pdf'])))
 
