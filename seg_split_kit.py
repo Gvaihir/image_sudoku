@@ -66,6 +66,7 @@ if __name__ == "__main__":
     # import images
     X_names = pd.DataFrame(sorted(glob(os.path.join(argsP.wd, '*.tif*'))))
     X_names['base'] = X_names.loc[:,0].str.extract(r'(r\d+c\d+)')
+    X_names['field'] = X_names.loc[:, 0].str.extract(r'(f\d+)')
 
     # create output dir
     if not os.path.exists(argsP.out):
@@ -114,6 +115,7 @@ if __name__ == "__main__":
             # export
             cv2.imwrite(os.path.join(argsP.out, "_".join(['Pt{0:02d}'.format(argsP.pt),
                                                           X_names['base'][i],
+                                                          X_names['field'][i],
                                                           '{0:04d}.tif'.format(j)])), crop_img)
         # OPTIONAL export of 25 samples
         if argsP.example:
@@ -135,6 +137,7 @@ if __name__ == "__main__":
                     plt.axis('off')
                 plt.savefig(fname=os.path.join(argsP.wd, "_".join(['Pt{0:02d}'.format(argsP.pt),
                                                                     X_names['base'][i],
+                                                                    X_names['field'][i],
                                                                     '{0:04d}_example.pdf'.format(j)])))
 
 
