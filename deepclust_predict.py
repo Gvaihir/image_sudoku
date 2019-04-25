@@ -8,11 +8,10 @@ from glob import glob
 import cv2
 import pandas as pd
 import matplotlib.pyplot as plt
-
+import torch.utils.data
 
 
 # pip
-from stardist import random_label_cmap
 from stardist import StarDist
 
 
@@ -49,5 +48,9 @@ if __name__ == "__main__":
         b = pickle.load(f, encoding='latin1')
 
     # get image names in the directory
-    im_names = [os.path.basename(x) for x in glob(os.path.join(argsP.wd, '*.tif*'))]
+    im_names = [os.path.basename(x) for x in sorted(glob(os.path.join(argsP.wd, '*.tif*')))]
+
+
+
+
 
