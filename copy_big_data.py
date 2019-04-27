@@ -24,4 +24,6 @@ argsP = parser.parse_args()
 
 for f in os.listdir(argsP.input):
     if os.path.isfile(f):
-        shutil.copy(f,argsP.output)
+        shutil.copy(f, argsP.output)
+
+
