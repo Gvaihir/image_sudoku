@@ -23,4 +23,4 @@ argsP = parser.parse_args()
 
 
 if __name__ == "__main__":
-    len(glob(os.path.join(argsP.input, argsP.file)))
+    print(len(glob(os.path.join(argsP.input, argsP.file))))
