@@ -1,9 +1,9 @@
 import shutil
-
 import os
 import sys
 import argparse
 from argparse import RawTextHelpFormatter
+from glob import glob
 
 
 # arguments
@@ -22,8 +22,8 @@ argsP = parser.parse_args()
 
 
 
-for f in os.listdir(argsP.input):
-    if os.path.isfile(f):
+if __name__ == "__main__":
+    for f in glob(os.path.join(argsP.input, '*.tif')):
         shutil.copy(f, argsP.output)
 
 
