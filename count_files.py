@@ -15,6 +15,7 @@ parser.add_argument('-i', '--input', default=os.getcwd(), help='directory to cop
 parser.add_argument('--file', type=str, default="*", help='File name string to count. Default - *')
 
 
+
 if len(sys.argv)==1:
     parser.print_help(sys.stderr)
     sys.exit(1)
