@@ -27,9 +27,9 @@ lbl_cmap = random_label_cmap()
 
 # arguments
 parser = argparse.ArgumentParser(
-    description='''A module to estimate cluster consistency and visualize the clusters at various epochs''',
+    description='''A module to infer classes of images based on deepcluster trained net''',
     formatter_class=RawTextHelpFormatter,
-    epilog='''Visualize wisely''')
+    epilog='''Infer classes wisely''')
 parser.add_argument('--wd', default = os.getcwd(), help='directory with images. Default - WD')
 parser.add_argument('--model', default=os.path.join(os.getcwd(), 'models'),
                     help='directory with models. Default - WD/models')
