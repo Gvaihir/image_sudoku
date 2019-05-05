@@ -33,7 +33,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('--wd', default = os.getcwd(), help='directory with images. Default - WD')
 parser.add_argument('--model', default=os.path.join(os.getcwd(), 'models'),
                     help='directory with models. Default - WD/models')
-parser.add_argument('--out', default=os.path.join(os.getcwd(), 'clust_visual'), help='output dir. Default - WD/cropped')
+parser.add_argument('--out', default=os.path.join(os.getcwd(), 'clust_infer'), help='output dir. Default - WD/clust_infer')
 
 if len(sys.argv)==1:
     parser.print_help(sys.stderr)
