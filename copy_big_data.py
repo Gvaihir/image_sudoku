@@ -39,7 +39,8 @@ if __name__ == "__main__":
             for f in rand_select:
                 shutil.copy(f, argsP.output)
 
-    for f in glob(os.path.join(argsP.input, "".join([argsP.file, '*tif']))):
-        shutil.copy(f, argsP.output)
+    else:
+        for f in glob(os.path.join(argsP.input, "".join([argsP.file, '*tif']))):
+            shutil.copy(f, argsP.output)
 
 
