@@ -14,7 +14,7 @@ parser = argparse.ArgumentParser(
     formatter_class=RawTextHelpFormatter,
     epilog='''Copy wisely''')
 parser.add_argument('-i', '--input', default=os.getcwd(), help='directory to copy from. Default - WD')
-parser.add_argument('--file', default=None, help='File name to copy. Default - NONE')
+parser.add_argument('--file', default="*", help='File name to copy. Default - NONE')
 parser.add_argument('--rnd', default=None, type=float, help='Select random cells? Accepts float[0.0:1.0] Default = NONE')
 requiredNamed = parser.add_argument_group('required named arguments')
 requiredNamed.add_argument('-o', '--output', help='Input file name', required=True)
