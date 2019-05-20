@@ -29,7 +29,7 @@ argsP = parser.parse_args()
 if __name__ == "__main__":
 
     # use selection ?
-    if argsP.selection != None:
+    if argsP.rnd != None:
         uniq_wells = np.unique([re.search(r'(Pt\d+_r\d+c\d+)', x)[0] for x in glob(os.path.join(argsP.input, '*tif'))])
 
         for i in uniq_wells:
