@@ -100,7 +100,7 @@ if __name__ == "__main__":
         area = [PolyArea(x, coord) for x in points_pre]
 
         # perform filter by area
-        points = [[points_pre[x], area[x]] for x in range(len(points)) if area[x] > 100]
+        points = [[points_pre[x], area[x]] for x in range(len(points_pre)) if area[x] > 100]
 
         if len(points) < 10:
             continue
