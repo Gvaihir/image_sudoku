@@ -88,9 +88,9 @@ if __name__ == "__main__":
 
     ###### PREDICT FOR EACH IMAGE ######
     for i in range(0, len(X)):
-
+        im_name = X_names.file_name[i]
         # Log
-        print("Starting image {}".format(X_names.file_name[i]))
+        print("Starting image {}".format(im_name))
         sys.stdout.flush()
 
         coord, points_pre = stardist_predict(X[i], model=model, size=72, prob_thresh=0.7, nms_thresh=0.7)
@@ -100,7 +100,7 @@ if __name__ == "__main__":
         area_pre = [PolyArea(x, coord) for x in points_pre]
 
         # perform filter by area
-        points = [points_pre[x] for x in range(len(points_pre)) if area_pre[x] > 100]
+        points = [points_pre[x].tolist() for x in range(len(points_pre)) if area_pre[x] > 100]
         area = [area_pre[x] for x in range(len(area_pre)) if area_pre[x] > 100]
 
         if len(points) < 10:
@@ -128,12 +128,12 @@ if __name__ == "__main__":
         result = MetaData(im_name, points_final, area_final)
         out_file = ".".join([X_names.file_name[i], 'json'])
 
-        print("Finished image {}".format(X_names.file_name[i]))
+        print("Finished image {}".format(im_name))
         sys.stdout.flush()
 
         ### Export JSON ###
         with open(os.path.join(argsP.out, out_file), "w") as file:
-            json.dump(obj.__dict__, file)
+            json.dump(result.__dict__, file)
 
         if argsP.crop:
             # split and export single cells
