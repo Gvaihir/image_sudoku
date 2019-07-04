@@ -118,3 +118,14 @@ class Logger():
         self.data.append(train_point)
         with open(os.path.join(self.path), 'wb') as fp:
             pickle.dump(self.data, fp, -1)
+
+
+class MetaData(object):
+    """
+    Class with image name, centroid coordinates, surface area
+
+    """
+    def __init__(self, im_name, points_ls):
+        self.image = im_name
+        self.points = [x[0] for x in points_ls]
+        self.area = [x[1] for x in points_ls]

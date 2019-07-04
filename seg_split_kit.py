@@ -10,6 +10,7 @@ from glob import glob
 import cv2
 import pandas as pd
 import matplotlib.pyplot as plt
+import json
 
 
 
@@ -48,6 +49,7 @@ parser.add_argument('--pt', default = 1, type=int, help='Plate number. Default -
 parser.add_argument('--rnd', default = False, type=bool, help='Select subset of images per well? Default - FALSE')
 parser.add_argument('--rnd_numb', default = 10, type=int, help='Number of images to select from well. Use with --rnd=True'
                                                                ' Default - 10')
+parser.add_argument('--crop', action='store_true', help='crop and export images')
 parser.add_argument('--example', default = False, type=bool, help='Export 25 random examples of cells with area and coordinates?'
                                                                   'Deafault - FALSE')
 parser.add_argument('--example_prob', default = 0, type=restricted_float, help='For how many images per well get the examples?'
@@ -67,6 +69,7 @@ if __name__ == "__main__":
     X_names = pd.DataFrame(sorted(glob(os.path.join(argsP.wd, '*.tif*'))))
     X_names['base'] = X_names.loc[:,0].str.extract(r'(r\d+c\d+)')
     X_names['field'] = X_names.loc[:, 0].str.extract(r'(f\d+)')
+    X_names['file_name'] = X_names.loc[:, 0].str.extract(r'(r\d+c\d+f\d+)')
 
     # create output dir
     if not os.path.exists(argsP.out):
@@ -76,7 +79,7 @@ if __name__ == "__main__":
     if argsP.rnd:
         X_names = X_names.groupby('base').apply(lambda x: x.sample(argsP.rnd_numb)).reset_index(drop=True)
 
-
+    # image import
     X = [cv2.imread(x, -1) for x in X_names.loc[:,0]]
 
     # import model
@@ -84,14 +87,14 @@ if __name__ == "__main__":
 
     ###### PREDICT FOR EACH IMAGE ######
     for i in range(0, len(X)):
-        coord, points = stardist_predict(X[i], model=model, size=72, prob_thresh=0.7, nms_thresh=0.7)
+        coord, points_pre = stardist_predict(X[i], model=model, size=72, prob_thresh=0.7, nms_thresh=0.7)
 
         # exclude points based on the polygon surface
         # estimate area
-        area = [PolyArea(x, coord) for x in points]
+        area = [PolyArea(x, coord) for x in points_pre]
 
         # perform filter by area
-        points = [points[x] for x in range(len(points)) if area[x] > 100]
+        points = [[points_pre[x], area[x]] for x in range(len(points)) if area[x] > 100]
 
         if len(points) < 10:
             continue
@@ -108,15 +111,25 @@ if __name__ == "__main__":
         # append both lists
         points_final = points_filt + point_clust
 
-        # split and export single cells
-        for j in range(0, len(points_final)):
-            crop_img = slice_export(img = X[i], points=points_final[j], size = 70)
+        # export as json
+        result = MetaData(im_name, points_final)
+        out_file = ".".join([X_names.file_name[i], 'json'])
 
-            # export
-            cv2.imwrite(os.path.join(argsP.out, "_".join(['Pt{0:02d}'.format(argsP.pt),
-                                                          X_names['base'][i],
-                                                          X_names['field'][i],
-                                                          '{0:04d}.tif'.format(j)])), crop_img)
+        ### Export JSON ###
+        with open(os.path.join(argsP.out, out_file), "w") as file:
+            json.dump(obj.__dict__, file)
+
+        if argsP.crop:
+            # split and export single cells
+            for j in range(0, len(points_final)):
+                crop_img = slice_export(img=X[i], points=points_final[j], size=70)
+
+                # export
+                cv2.imwrite(os.path.join(argsP.out, "_".join(['Pt{0:02d}'.format(argsP.pt),
+                                                              X_names['base'][i],
+                                                              X_names['field'][i],
+                                                              '{0:04d}.tif'.format(j)])), crop_img)
+
         # OPTIONAL export of 25 samples
         if argsP.example:
 
