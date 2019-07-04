@@ -97,10 +97,11 @@ if __name__ == "__main__":
 
         # exclude points based on the polygon surface
         # estimate area
-        area = [PolyArea(x, coord) for x in points_pre]
+        area_pre = [PolyArea(x, coord) for x in points_pre]
 
         # perform filter by area
-        points = [[points_pre[x], area[x]] for x in range(len(points_pre)) if area[x] > 100]
+        points = [points_pre[x] for x in range(len(points_pre)) if area_pre[x] > 100]
+        area = [area_pre[x] for x in range(len(area_pre)) if area_pre[x] > 100]
 
         if len(points) < 10:
             continue
@@ -110,15 +111,21 @@ if __name__ == "__main__":
 
         # get individual points, which have no cluster
         points_filt = [points[x] for x in range(len(points)) if labels[x] == -1]
+        area_filt = [area[x] for x in range(len(area)) if labels[x] == -1]
 
         # get medoid points for clusters
-        point_clust = [find_medoid(x, points=points, labels=labels) for x in list(set(labels[labels != -1]))]
+        point_clust = [find_medoid(x, points=points, labels=labels, area=area)[0] for x in
+                       list(set(labels[labels != -1]))]
+
+        area_clust = [find_medoid(x, points=points, labels=labels, area=area)[1] for x in
+                       list(set(labels[labels != -1]))]
 
         # append both lists
         points_final = points_filt + point_clust
+        area_final = area_filt + area_clust
 
         # export as json
-        result = MetaData(im_name, points_final)
+        result = MetaData(im_name, points_final, area_final)
         out_file = ".".join([X_names.file_name[i], 'json'])
 
         print("Finished image {}".format(X_names.file_name[i]))

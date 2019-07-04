@@ -10,7 +10,7 @@ class MetaData(object):
     Class with image name, centroid coordinates, surface area
 
     """
-    def __init__(self, im_name, points_ls):
+    def __init__(self, im_name, points_ls, area_ls):
         self.image = im_name
-        self.points = [x[0] for x in points_ls]
-        self.area = [x[1] for x in points_ls]
+        self.points = points_ls
+        self.area = area_ls
