@@ -88,6 +88,11 @@ if __name__ == "__main__":
 
     ###### PREDICT FOR EACH IMAGE ######
     for i in range(0, len(X)):
+
+        # Log
+        print("Starting image {}".format(X_names.file_name[i]))
+        sys.stdout.flush()
+
         coord, points_pre = stardist_predict(X[i], model=model, size=72, prob_thresh=0.7, nms_thresh=0.7)
 
         # exclude points based on the polygon surface
@@ -115,6 +120,9 @@ if __name__ == "__main__":
         # export as json
         result = MetaData(im_name, points_final)
         out_file = ".".join([X_names.file_name[i], 'json'])
+
+        print("Finished image {}".format(X_names.file_name[i]))
+        sys.stdout.flush()
 
         ### Export JSON ###
         with open(os.path.join(argsP.out, out_file), "w") as file:
