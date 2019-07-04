@@ -1,7 +1,7 @@
 # Copyright (c) 2018-present, Anton (Gvaihir) Ogorodnikov, Ye lab UCSF.
 
 #!/bin/bash
-conda activate imgSudoku
+source activate imgSudoku
 
 WD=""
 MODEL=""
