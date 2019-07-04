@@ -8,6 +8,7 @@ MODEL=""
 PT="4"
 OUT=""
 DEV=""
+PYTHON="/home/aogorodnikov/anaconda3/envs/imgSudoku/bin/python"
 
 
 mkdir -p ${OUT}
