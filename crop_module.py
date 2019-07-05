@@ -79,7 +79,7 @@ if __name__ == "__main__":
         sys.stdout.flush()
 
         # import image
-        X = cv2.imread(X_names.loc[0, i], -1)
+        X = cv2.imread(X_names.iloc[0, i], -1)
 
         # import meta data in JSON
         json_fileName = ".".join([X_names.file_name[i], "json"])
