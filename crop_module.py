@@ -87,7 +87,7 @@ if __name__ == "__main__":
             with open(os.path.join(argsP.meta_wd, json_fileName)) as json_file:
                 data = json.load(json_file)
         except FileNotFoundError:
-            pass
+            continue
 
 
         for j in range(len(data["points"])):
