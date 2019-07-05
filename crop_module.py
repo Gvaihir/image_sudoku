@@ -90,7 +90,7 @@ if __name__ == "__main__":
 
             # export
             cv2.imwrite(os.path.join(argsP.out, "_".join(['Pt{0:02d}'.format(argsP.pt),
-                                                          X_names['base'][i],
+                                                          X_names['well'][i],
                                                           X_names['field'][i],
                                                           '{0:04d}.tif'.format(j)])), crop_img)
 
