@@ -75,6 +75,9 @@ if __name__ == "__main__":
 
     for i in range(X_names.shape[0]):
 
+        print("Starting image {}".format(X_names.file_name[i]))
+        sys.stdout.flush()
+
         # import image
         X = cv2.imread(X_names.loc[0, i], -1)
 
@@ -93,6 +96,8 @@ if __name__ == "__main__":
                                                           X_names['well'][i],
                                                           X_names['field'][i],
                                                           '{0:04d}.tif'.format(j)])), crop_img)
+        print("Finished image {}".format(X_names.file_name[i]))
+        sys.stdout.flush()
 
             # OPTIONAL export of 25 samples
             if argsP.example:
