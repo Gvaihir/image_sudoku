@@ -96,8 +96,6 @@ if __name__ == "__main__":
                                                           X_names['well'][i],
                                                           X_names['field'][i],
                                                           '{0:04d}.tif'.format(j)])), crop_img)
-        print("Finished image {}".format(X_names.file_name[i]))
-        sys.stdout.flush()
 
             # OPTIONAL export of 25 samples
             if argsP.example:
@@ -122,6 +120,8 @@ if __name__ == "__main__":
                                                                        X_names['field'][i],
                                                                        '{0:04d}_example.pdf'.format(j)])))
 
+    print("Finished image {}".format(X_names.file_name[i]))
+        sys.stdout.flush()
 
 
 
