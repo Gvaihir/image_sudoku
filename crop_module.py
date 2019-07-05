@@ -97,28 +97,28 @@ if __name__ == "__main__":
                                                           X_names['field'][i],
                                                           '{0:04d}.tif'.format(j)])), crop_img)
 
-            # OPTIONAL export of 25 samples
-            if argsP.example:
+        # OPTIONAL export of 25 samples
+        if argsP.example:
+            # draw 1 or 0 with probability argsP.example_prob
+            if np.random.choice(range(0, 2), p=[1 - argsP.example_prob, argsP.example_prob]) == 1:
+                fig = plt.figure(figsize=(8, 8))
+                columns = 5
+                rows = 5
+                for k in range(1, columns * rows + 1):
+                    rand_select = np.random.choice(range(1, len(data["points"])))
+                    p = data["points"][rand_select]
+                    lol = data['area'][rand_select]
+                    img_crop = slice_export(img=X, points=p, size=argsP.crop_size)
+                    fig.add_subplot(rows, columns, k)
+                    plt.text(0, 0, s=lol)
+                    plt.text(8, 8, s=p, color='red')
+                    plt.imshow(img_crop, cmap='gray');
+                    plt.axis('off')
+                plt.savefig(fname=os.path.join(argsP.out, "_".join(['Pt{0:02d}'.format(argsP.pt),
+                                                                   X_names['well'][i],
+                                                                   X_names['field'][i],'example.pdf'])))
 
-                # draw 1 or 0 with probability argsP.example_prob
-                if np.random.choice(range(0, 2), p=[1 - argsP.example_prob, argsP.example_prob]) == 1:
-                    fig = plt.figure(figsize=(8, 8))
-                    columns = 5
-                    rows = 5
-                    for k in range(1, columns * rows + 1):
-                        p = points_final[np.random.choice(range(1, len(points_final)))]
-                        x, y = coord[p[0], p[1], 1], coord[p[0], p[1], 0]
-                        lol = PolyArea(p, coord)
-                        img_crop = slice_export(img=X[i], points=p, size=70)
-                        fig.add_subplot(rows, columns, k)
-                        plt.text(0, 0, s=lol)
-                        plt.text(8, 8, s=p, color='red')
-                        plt.imshow(img_crop, cmap='gray');
-                        plt.axis('off')
-                    plt.savefig(fname=os.path.join(argsP.wd, "_".join(['Pt{0:02d}'.format(argsP.pt),
-                                                                       X_names['base'][i],
-                                                                       X_names['field'][i],
-                                                                       '{0:04d}_example.pdf'.format(j)])))
+
 
     print("Finished image {}".format(X_names.file_name[i]))
         sys.stdout.flush()
