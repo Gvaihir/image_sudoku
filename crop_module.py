@@ -120,9 +120,3 @@ if __name__ == "__main__":
 
 
 
-    print("Finished image {}".format(X_names.file_name[i]))
-        sys.stdout.flush()
-
-
-
-
