@@ -109,6 +109,8 @@ if __name__ == "__main__":
                     p = data["points"][rand_select]
                     lol = data['area'][rand_select]
                     img_crop = slice_export(img=X, points=p, size=argsP.crop_size)
+                    if img_crop.size == 0:
+                        continue
                     fig.add_subplot(rows, columns, k)
                     plt.text(0, 0, s=lol)
                     plt.text(8, 8, s=p, color='red')
@@ -117,6 +119,3 @@ if __name__ == "__main__":
                 plt.savefig(fname=os.path.join(argsP.out, "_".join(['Pt{0:02d}'.format(argsP.pt),
                                                                    X_names['well'][i],
                                                                    X_names['field'][i],'example.pdf'])))
-
-
-
