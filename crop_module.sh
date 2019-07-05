@@ -16,5 +16,5 @@ PYTHON="/home/aogorodnikov/anaconda3/envs/imgSudoku/bin/python"
 
 mkdir -p ${OUT}
 
-${PYTHON} seg_split_kit.py ----img_wd ${IMG} --meta_wd ${META} --pt ${PLATE} \
+${PYTHON} crop_module.py ----img_wd ${IMG} --meta_wd ${META} --pt ${PLATE} \
         --example True --example_prob 0.01 --out ${OUT}
