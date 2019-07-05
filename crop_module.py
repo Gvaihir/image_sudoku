@@ -87,11 +87,6 @@ if __name__ == "__main__":
             crop_img = slice_export(img=X, points=data["points"][j], size=argsP.crop_size)
             if crop_img.size == 0:
                 continue
-            cv2.imwrite(os.path.join("/Users/antonogorodnikov/Documents/Work/DataSci/01_sudoku_image/meta/123",
-                                     "_".join(['Pt{0:02d}'.format(4),
-                                               X_names['well'][i],
-                                               X_names['field'][i],
-                                               '{0:04d}.tif'.format(j)])), crop_img)
 
             # export
             cv2.imwrite(os.path.join(argsP.out, "_".join(['Pt{0:02d}'.format(argsP.pt),
