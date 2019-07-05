@@ -83,8 +83,12 @@ if __name__ == "__main__":
 
         # import meta data in JSON
         json_fileName = ".".join([X_names.file_name[i], "json"])
-        with open(os.path.join(argsP.meta_wd, json_fileName)) as json_file:
-            data = json.load(json_file)
+        try:
+            with open(os.path.join(argsP.meta_wd, json_fileName)) as json_file:
+                data = json.load(json_file)
+        except FileNotFoundError:
+            pass
+
 
         for j in range(len(data["points"])):
             crop_img = slice_export(img=X, points=data["points"][j], size=argsP.crop_size)
