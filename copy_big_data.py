@@ -39,7 +39,7 @@ if __name__ == "__main__":
         for i in uniq_wells:
             print("Copying file {}".format(i))
             sys.stdout.flush()
-            all_files = glob(os.path.join(argsP.input, "".join([i, '*tif'])))
+            all_files = glob(os.path.join(argsP.input, "".join([i, '*tif*'])))
             rand_select = np.random.choice(all_files, round(len(all_files) * argsP.rnd), replace=False)
 
             for f in rand_select:
