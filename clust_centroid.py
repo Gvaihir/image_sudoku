@@ -55,10 +55,13 @@ def dbscan_alg(points, eps=15, min_samples=2):
 
 
 
-def find_medoid(cluster, points, labels):
+def find_medoid(cluster, points, labels, area):
     rel_points = [points[x] for x in range(len(points)) if labels[x] == cluster]
+    rel_area = [area[x] for x in range(len(area)) if labels[x] == cluster]
     pwdist = metrics.pairwise_distances(rel_points)
-    return rel_points[np.argmin(pwdist.sum(axis=1))]
+    point_out = rel_points[np.argmin(pwdist.sum(axis=1))]
+    area_out = rel_area[np.argmin(pwdist.sum(axis=1))]
+    return [point_out, area_out]
 
 
 

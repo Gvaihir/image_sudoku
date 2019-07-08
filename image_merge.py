@@ -41,7 +41,7 @@ if __name__ == "__main__":
     inDir = listdir_nohidden(inPath)
     inDir.sort()
     dfDir = pd.DataFrame(inDir, columns=['Name'])
-    outPath = '/'.join([os.path.dirname(inPath), "converted"])
+    outPath = '/'.join([os.path.dirname(inPath), "converted_rgb"])
     if not os.path.exists(outPath):
         os.makedirs(outPath)
 
