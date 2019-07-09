@@ -4,7 +4,7 @@
 source activate imgSudoku
 
 pt="Pt04"
-row="r01"
+row="r02"
 
 IMG="/sudoku/screen_converted_rgb/"$pt/$row
 META="/sudoku/meta/"$pt/$row
