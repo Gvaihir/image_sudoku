@@ -3,12 +3,12 @@
 #!/bin/bash
 source activate imgSudoku
 
-pt="Pt04"
+pt="Pt11"
 row="r02"
 
 IMG="/sudoku/screen_converted_rgb/"$pt/$row
 META="/sudoku/meta/"$pt/$row
-PLATE="4"
+PLATE="11"
 OUT="/sudoku/crop_rgb/"$pt/$row
 
 PYTHON="/home/aogorodnikov/anaconda3/envs/imgSudoku/bin/python"
