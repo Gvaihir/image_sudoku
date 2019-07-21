@@ -111,7 +111,7 @@ if __name__ == "__main__":
         points = [points_pre[x].tolist() for x in range(len(points_pre)) if area_pre[x] > 100]
         area = [area_pre[x] for x in range(len(area_pre)) if area_pre[x] > 100]
 
-        points[:10]
+        print(points[:10])
         sys.stdout.flush()
 
         if len(points) < 10:
