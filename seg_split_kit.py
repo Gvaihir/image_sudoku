@@ -47,6 +47,7 @@ parser.add_argument('--wd', default = os.getcwd(), help='directory with images. 
 parser.add_argument('--model', default=os.path.join(os.getcwd(), 'models'),
                     help='directory with models. Default - WD/models/stardist_no_shape_completion')
 parser.add_argument('--pt', default = 1, type=int, help='Plate number. Default - 1')
+parser.add_argument('--format', default = "tif", type=str, help='File format. Default - tif')
 parser.add_argument('--rnd', default = False, type=bool, help='Select subset of images per well? Default - FALSE')
 parser.add_argument('--rnd_numb', default = 10, type=int, help='Number of images to select from well. Use with --rnd=True'
                                                                ' Default - 10')
@@ -67,10 +68,17 @@ argsP = parser.parse_args()
 if __name__ == "__main__":
 
     # import images
-    X_names = pd.DataFrame(sorted(glob(os.path.join(argsP.wd, '*.tif*'))))
+    X_names = pd.DataFrame(sorted(glob(os.path.join(argsP.wd, '*.'+argsP.format+'*'))))
+
+    ''' 
     X_names['base'] = X_names.loc[:,0].str.extract(r'(r\d+c\d+)')
     X_names['field'] = X_names.loc[:, 0].str.extract(r'(f\d+)')
     X_names['file_name'] = X_names.loc[:, 0].str.extract(r'(r\d+c\d+f\d+)')
+    '''
+
+    X_names['base'] = X_names.loc[:, 0].str.extract(r'([A-Z]\d+)')
+    X_names['field'] = X_names.loc[:, 0].str.extract(r'(s\d+)')
+    X_names['file_name'] = X_names.loc[:, 0].str.extract(r'([A-Z]\d+_s\d+_w\d+)')
 
     # create output dir
     if not os.path.exists(argsP.out):
