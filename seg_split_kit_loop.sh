@@ -18,7 +18,7 @@ WD=$subdir
 MODEL="/home/aogorodnikov/models"
 PT=$(echo $subdir | rev | cut -b1 | rev)
 OUT=/sudoku/meta_test/$base_dir/$base_sub
-DEV="1"
+DEV="0"
 FORMAT="png"
 PYTHON="/home/aogorodnikov/anaconda3/envs/imgSudoku/bin/python"
 
