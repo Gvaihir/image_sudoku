@@ -6,7 +6,7 @@ source activate imgSudoku
 train=/sudoku/train_w1
 test=/sudoku/test_w1
 
-for dir in $train/*;
+for dir in $test/*;
 do
 for subdir in $dir/*;
 do
@@ -17,8 +17,8 @@ base_sub=$(basename -- "$subdir")
 WD=$subdir
 MODEL="/home/aogorodnikov/models"
 PT=$(echo $subdir | rev | cut -b1 | rev)
-OUT=/sudoku/meta_train/$base_dir/$base_sub
-DEV="0"
+OUT=/sudoku/meta_test/$base_dir/$base_sub
+DEV="1"
 FORMAT="png"
 PYTHON="/home/aogorodnikov/anaconda3/envs/imgSudoku/bin/python"
 
