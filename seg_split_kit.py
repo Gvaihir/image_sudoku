@@ -132,6 +132,9 @@ if __name__ == "__main__":
         points_final = points_filt + point_clust
         area_final = area_filt + area_clust
 
+        points_final[:10]
+        sys.stdout.flush()
+
         # export as json
         result = MetaData(im_name, points_final, area_final)
         out_file = ".".join([X_names.file_name[i], 'json'])
