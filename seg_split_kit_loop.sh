@@ -26,7 +26,7 @@ PYTHON="/home/aogorodnikov/anaconda3/envs/imgSudoku/bin/python"
 mkdir -p ${OUT}
 
 CUDA_VISIBLE_DEVICES=${DEV} ${PYTHON} seg_split_kit.py --wd ${WD} --model ${MODEL} --pt ${PT} \
-    --format=${FORMAT}
+    --format=${FORMAT} --out ${OUT}
 
 done
 done

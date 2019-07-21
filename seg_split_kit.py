@@ -139,9 +139,6 @@ if __name__ == "__main__":
         print("Finished image {}".format(im_name))
         sys.stdout.flush()
 
-        print(os.path.join(argsP.out, out_file))
-        sys.stdout.flush()
-
         ### Export JSON ###
         with open(os.path.join(argsP.out, out_file), "w") as file:
             json.dump(result.__dict__, file)
