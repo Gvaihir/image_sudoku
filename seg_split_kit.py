@@ -111,6 +111,9 @@ if __name__ == "__main__":
         points = [points_pre[x].tolist() for x in range(len(points_pre)) if area_pre[x] > 100]
         area = [area_pre[x] for x in range(len(area_pre)) if area_pre[x] > 100]
 
+        points[:10]
+        sys.stdout.flush()
+
         if len(points) < 10:
             continue
 
@@ -132,8 +135,6 @@ if __name__ == "__main__":
         points_final = points_filt + point_clust
         area_final = area_filt + area_clust
 
-        points_final[:10]
-        sys.stdout.flush()
 
         # export as json
         result = MetaData(im_name, points_final, area_final)
