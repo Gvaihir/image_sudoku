@@ -6,7 +6,7 @@ source activate imgSudoku
 train=/sudoku/train_w1
 test=/sudoku/test_w1
 
-for dir in $test/*;
+for dir in $train/*;
 do
 for subdir in $dir/*;
 do
