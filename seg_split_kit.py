@@ -136,10 +136,10 @@ if __name__ == "__main__":
         result = MetaData(im_name, points_final, area_final)
         out_file = ".".join([X_names.file_name[i], 'json'])
 
-        print(result.__dict__)
+        print("Finished image {}".format(im_name))
         sys.stdout.flush()
 
-        print("Finished image {}".format(im_name))
+        print(os.path.join(argsP.out, out_file))
         sys.stdout.flush()
 
         ### Export JSON ###
