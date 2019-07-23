@@ -21,6 +21,8 @@ parser.add_argument('--g_coeff', default = 1, type=float, help='FLOAT Pixel inte
 parser.add_argument('--r_coeff', default = 1, type=float, help='FLOAT Pixel intensity coefficient: PI\' = 8bitPI * r_coeff (Default: 1)')
 parser.add_argument('--tile_size', default = 256, type=int, help='INT Size of a tile for splitting')
 parser.add_argument('--ntiles', default = 4, type=int, help='INT Number of tiles to split into. Default = 4 (each image will be split into 4)')
+parser.add_argument('--format', default = 'tif', type=str, help='Image format. Default = TIF')
+parser.add_argument('--ch_pattern', default = 'ch', type=str, help='String pattern which defines channel. Accepted {ch, w}. Default = CH')
 parser.add_argument('--edge_red', default = False, type=bool, help='BOOL Option to perform LoG on red channel. Default = False')
 parser.add_argument('--laplace_kernel', default = 3, type=int, help='INT Kernel for LoG. Has to be odd. Default = 3')
 parser.add_argument('--selection', default = None, type=str, help='STR Select specific portions of the screen. Accepts tab delimited list of plates/wells. See samplesheet. Default = NONE')
@@ -33,7 +35,7 @@ argsP = parser.parse_args()
 
 # ignoring hidden files
 def listdir_nohidden(path):
-    return [os.path.basename(x) for x in glob.glob(os.path.join(path, '*.tiff'))]
+    return [os.path.basename(x) for x in glob.glob(os.path.join(path, '*.'+argsP.format+'*'))]
 
 
 if __name__ == "__main__":
@@ -69,9 +71,9 @@ if __name__ == "__main__":
         dfRel = dfDir[dfDir.Sample == x]
 
         # import images for each channel
-        b = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains('ch1'), 'Name'].to_string(index=False)]), -1)
-        g = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains('ch2'), 'Name'].to_string(index=False)]), -1)
-        r = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains('ch3'), 'Name'].to_string(index=False)]), -1)
+        b = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains(argsP.ch_pattern+'1'), 'Name'].to_string(index=False)]), -1)
+        g = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains(argsP.ch_pattern+'2'), 'Name'].to_string(index=False)]), -1)
+        r = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains(argsP.ch_pattern+'3'), 'Name'].to_string(index=False)]), -1)
 
 
         # work on different channels
