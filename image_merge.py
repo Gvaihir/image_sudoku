@@ -16,11 +16,11 @@ parser = argparse.ArgumentParser(
     formatter_class=RawTextHelpFormatter,
     epilog="""Merge wisely""")
 parser.add_argument('--wd', default = os.getcwd(), help='directory with images. Default - WD')
-parser.add_argument('--b_coeff', default = 1, type=float, help='FLOAT Pixel intensity coefficient: PI\' = 8bitPI * b_coeff (Default: 1)')
-parser.add_argument('--g_coeff', default = 1, type=float, help='FLOAT Pixel intensity coefficient: PI\' = 8bitPI * g_coeff (Default: 1)')
-parser.add_argument('--r_coeff', default = 1, type=float, help='FLOAT Pixel intensity coefficient: PI\' = 8bitPI * r_coeff (Default: 1)')
-parser.add_argument('--tile_size', default = 256, type=int, help='INT Size of a tile for splitting')
-parser.add_argument('--ntiles', default = 4, type=int, help='INT Number of tiles to split into. Default = 4 (each image will be split into 4)')
+parser.add_argument('--ch_coeff', default = [1,1,1], nargs='+', type=float, help='FLOAT Pixel intensity coefficient: PI\' = 8bitPI * ch_coeff \n'
+                                                                                 '(Default: BLUE: 1; GREEN: 1; RED: 1)')
+parser.add_argument('--chs', default = [1,2,3], nargs='+', type=str, help='STR Channels to use')
+parser.add_argument('--tile_size', default = 2048, type=int, help='INT Size of a tile for splitting')
+parser.add_argument('--ntiles', default = 1, type=int, help='INT Number of tiles to split into. Default = 4 (each image will be split into 4)')
 parser.add_argument('--format', default = 'tif', type=str, help='Image format. Default = TIF')
 parser.add_argument('--ch_pattern', default = 'ch', type=str, help='String pattern which defines channel. Accepted {ch, w}. Default = CH')
 parser.add_argument('--edge_red', default = False, type=bool, help='BOOL Option to perform LoG on red channel. Default = False')
@@ -71,9 +71,9 @@ if __name__ == "__main__":
         dfRel = dfDir[dfDir.Sample == x]
 
         # import images for each channel
-        b = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains(argsP.ch_pattern+'1'), 'Name'].to_string(index=False)]), -1)
-        g = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains(argsP.ch_pattern+'2'), 'Name'].to_string(index=False)]), -1)
-        r = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains(argsP.ch_pattern+'3'), 'Name'].to_string(index=False)]), -1)
+        b = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains(argsP.ch_pattern+argsP.chs[0]), 'Name'].to_string(index=False)]), -1)
+        g = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains(argsP.ch_pattern+argsP.chs[1]), 'Name'].to_string(index=False)]), -1)
+        r = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains(argsP.ch_pattern+argsP.chs[2]), 'Name'].to_string(index=False)]), -1)
 
 
         # work on different channels
@@ -89,6 +89,6 @@ if __name__ == "__main__":
 
 
         pp_combine_export(b_list=b, g_list=g, r_list=r,
-                          b_coeff=argsP.b_coeff, g_coeff=argsP.g_coeff, r_coeff=argsP.r_coeff,
+                          b_coeff=argsP.ch_coeff[0], g_coeff=argsP.ch_coeff[1], r_coeff=argsP.ch_coeff[2],
                           outpath=outPath, imName=x)
 
