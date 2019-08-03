@@ -52,7 +52,7 @@ if __name__ == "__main__":
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(4, 4))
 
     # split file name, extract sample name
-    dfDir["Sample"] = dfDir["Name"].str.extract(argsP.name_pattern)
+    dfDir["Sample"] = dfDir["Name"].str.extract(eval(argsP.name_pattern))
     dfDir["Sample_selection"] = dfDir["Sample"].str.split('f', expand=True)[0]
     # use selection ?
     if argsP.selection != None:
