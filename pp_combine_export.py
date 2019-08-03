@@ -3,7 +3,7 @@ import numpy as np
 import os
 
 
-def pp_combine_export(b_list, g_list, r_list, b_coeff, g_coeff, r_coeff, outpath, imName):
+def pp_combine_export(b_list, g_list, r_list, b_coeff, g_coeff, r_coeff, outpath, imName, ext):
     '''
 
     function to combine and export final image in 8 bit format
@@ -34,7 +34,7 @@ def pp_combine_export(b_list, g_list, r_list, b_coeff, g_coeff, r_coeff, outpath
         img[:, :, 1] = g_list[i]/(g_list[i].max()/255.0)*g_coeff
         img[:, :, 2] = r_list[i]/(r_list[i].max()/255.0)*r_coeff
 
-        cv2.imwrite(os.path.join(outpath, "_".join([imName, '{0:02d}.tif'.format(i)])), img)
+        cv2.imwrite(os.path.join(outpath, "_".join([imName, '{0:02d}.'.format(i)+str(ext)])), img)
 
 
 def pp_combine_export_grey(b_list, b_coeff, outpath, imName):

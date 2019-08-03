@@ -91,5 +91,5 @@ if __name__ == "__main__":
 
         pp_combine_export(b_list=b, g_list=g, r_list=r,
                           b_coeff=argsP.ch_coeff[0], g_coeff=argsP.ch_coeff[1], r_coeff=argsP.ch_coeff[2],
-                          outpath=outPath, imName=x)
+                          outpath=outPath, imName=x, ext=argsP.format)
 
