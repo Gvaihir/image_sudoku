@@ -72,9 +72,9 @@ if __name__ == "__main__":
         dfRel = dfDir[dfDir.Sample == x]
 
         # import images for each channel
-        b = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains(argsP.ch_pattern+str(argsP.chs[0])), 'Name'].to_string(index=False)]), -1)
-        g = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains(argsP.ch_pattern+str(argsP.chs[1])), 'Name'].to_string(index=False)]), -1)
-        r = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains(argsP.ch_pattern+str(argsP.chs[2])), 'Name'].to_string(index=False)]), -1)
+        b = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains(argsP.ch_pattern+str(argsP.chs[0])), 'Name'].to_string(index=False).strip()]), -1)
+        g = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains(argsP.ch_pattern+str(argsP.chs[1])), 'Name'].to_string(index=False).strip()]), -1)
+        r = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains(argsP.ch_pattern+str(argsP.chs[2])), 'Name'].to_string(index=False).strip()]), -1)
 
 
         # work on different channels
