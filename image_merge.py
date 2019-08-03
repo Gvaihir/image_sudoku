@@ -22,7 +22,7 @@ parser.add_argument('--chs', default = [1,2,3], nargs='+', type=str, help='STR C
 parser.add_argument('--tile_size', default = 2048, type=int, help='INT Size of a tile for splitting')
 parser.add_argument('--ntiles', default = 1, type=int, help='INT Number of tiles to split into. Default = 1 (each image will be split into 1)')
 parser.add_argument('--format', default = 'tif', type=str, help='Image format. Default = TIF')
-parser.add_argument('--name_pattern', default = "r'([AB-Z]\d+_s\d)'", type=str, help='String pattern for image name. Uses Regex Default = "r'([AB-Z]\d+_s\d)'"')
+parser.add_argument('--name_pattern', default = "r'([AB-Z]\d+_s\d)'", type=str, help='String pattern for image name. Uses Regex Default = r'([AB-Z]\d+_s\d)' ')
 parser.add_argument('--ch_pattern', default = 'ch', type=str, help='String pattern which defines channel. Accepted {ch, w}. Default = CH')
 parser.add_argument('--edge_red', default = False, type=bool, help='BOOL Option to perform LoG on red channel. Default = False')
 parser.add_argument('--laplace_kernel', default = 3, type=int, help='INT Kernel for LoG. Has to be odd. Default = 3')
