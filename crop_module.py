@@ -52,9 +52,9 @@ if len(sys.argv)==1:
     parser.print_help(sys.stderr)
     sys.exit(1)
 argsP = parser.parse_args()
-
-
-
+'''
+TODO: make with other input data
+'''
 if __name__ == "__main__":
 
     # Organize data
