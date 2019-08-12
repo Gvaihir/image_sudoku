@@ -11,6 +11,7 @@ import cv2
 import pandas as pd
 import matplotlib.pyplot as plt
 import json
+import re
 
 
 
@@ -60,10 +61,12 @@ if __name__ == "__main__":
 
     # Organize data
     # import meta data
+
+# TODO adjust to different naming
     X_names = pd.DataFrame(sorted(glob(os.path.join(wd, '*.' + argsP.format + '*'))))
     X_names['base'] = X_names.loc[:, 0].str.split(pat="/", expand=True)[3]
     X_names['field'] = X_names.loc[:, 0].str.extract(r'(s\d+)')
-    X_names['file_name'] = X_names.loc[:, 0].str.extract(r'([A-Z]\d+_s\d+_w\d+)')
+    X_names['file_name'] = X_names.loc[:, 0].str.extract(r'([A-Z]\d+_s\d+)')
 
 '''SUDOKU
     X_names = pd.DataFrame(sorted(glob(os.path.join(wd, '*.' + argsP.format + '*'))))
@@ -80,6 +83,8 @@ if __name__ == "__main__":
     if argsP.rnd:
         X_names = X_names.groupby('well').apply(lambda x: x.sample(argsP.rnd_numb)).reset_index(drop=True)
 
+    json_files = glob(os.path.join(argsP.meta_wd, '*.json'))
+
     for i in range(X_names.shape[0]):
 
         print("Starting image {}".format(X_names.file_name[i]))
@@ -89,9 +94,20 @@ if __name__ == "__main__":
         X = cv2.imread(X_names.iloc[i, 0], -1)
 
         # import meta data in JSON
-        json_fileName = ".".join([X_names.file_name[i], "json"])
+        json_regex = re.compile(X_names.file_name[i])
+        json_match = list(filter(json_regex.search, json_files))
+
+
         try:
-            with open(os.path.join(argsP.meta_wd, json_fileName)) as json_file:
+            json_fileName = json_match[0]
+        except IndexError:
+            continue
+        assert (len(
+            json_match) == 1), "Crop_module ERROR: multiple matches detected for JSON files. Make your regex unique"
+
+
+        try:
+            with open(json_fileName) as json_file:
                 data = json.load(json_file)
         except FileNotFoundError:
             continue
@@ -103,9 +119,10 @@ if __name__ == "__main__":
                 continue
 
             # export
-            cv2.imwrite(os.path.join(out, "_".join(['Pt{0:02d}'.format(pt),
-                                                    X_names['base'][i],
-                                                    '{0:04d}.'.format(j) + str(img_format)])), crop_img)
+            cv2.imwrite(os.path.join(argsP.out, "_".join(['Pt{0:02d}'.format(argsP.pt),
+                                                          X_names['base'][i],
+                                                          X_names['file_name'][i],
+                                                          '{0:04d}.'.format(j) + str(argsP.img_format)])), crop_img)
             '''SUDOKU
             cv2.imwrite(os.path.join(argsP.out, "_".join(['Pt{0:02d}'.format(argsP.pt),
                                                           X_names['well'][i],
@@ -133,6 +150,12 @@ if __name__ == "__main__":
                     plt.text(8, 8, s=p, color='red')
                     plt.imshow(img_crop, cmap='gray');
                     plt.axis('off')
+
+                plt.savefig(fname=os.path.join(argsP.out, "_".join(['Pt{0:02d}'.format(argsP.pt),
+                                                                    X_names['base'][i],
+                                                                    X_names['file_name'][i], 'example.pdf'])))
+                '''SUDOKU
                 plt.savefig(fname=os.path.join(argsP.out, "_".join(['Pt{0:02d}'.format(argsP.pt),
                                                                    X_names['well'][i],
                                                                    X_names['field'][i],'example.pdf'])))
+                '''
