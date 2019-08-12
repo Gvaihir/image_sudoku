@@ -3,7 +3,7 @@
 #!/bin/bash
 source activate imgSudoku
 
-cwd="/sudoku/train"
+cwd="/sudoku/test"
 CROP=90
 for cell_line in $cwd/*;
 do
@@ -13,9 +13,9 @@ do
     pt=$(basename -- "$plate")
     p=${pt: -1}
     IMG=$cwd/$cl/$pt/converted_rgb
-    META=/sudoku/meta_train/$cl/$pt
+    META=/sudoku/meta_test/$cl/$pt
     PLATE=$p
-    OUT=/sudoku/crop_rgb/train/$cl/$pt
+    OUT=/sudoku/crop_rgb/test/$cl/$pt
 
     PYTHON="/home/aogorodnikov/anaconda3/envs/imgsudoku/bin/python"
     mkdir -p ${OUT}
