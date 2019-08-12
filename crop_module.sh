@@ -21,3 +21,6 @@ do
     mkdir -p ${OUT}
     ${PYTHON} crop_module.py --img_wd ${IMG} --meta_wd ${META} --pt ${PLATE} \
         --example True --example_prob 0.02 --out ${OUT} --crop_size 90 --format "png"
+
+  done
+done
