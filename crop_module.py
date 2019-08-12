@@ -67,14 +67,15 @@ if __name__ == "__main__":
     X_names['base'] = X_names.loc[:, 0].str.split(pat="/", expand=True)[3]
     X_names['field'] = X_names.loc[:, 0].str.extract(r'(s\d+)')
     X_names['file_name'] = X_names.loc[:, 0].str.extract(r'([A-Z]\d+_s\d+)')
-'''
-SUDOKU
+
+    '''
+    SUDOKU
     X_names = pd.DataFrame(sorted(glob(os.path.join(wd, '*.' + argsP.format + '*'))))
     X_names['plate'] = X_names.loc[:, 0].str.extract(r'(Pt\d+)')
     X_names['well'] = X_names.loc[:, 0].str.extract(r'(r\d+c\d+)')
     X_names['field'] = X_names.loc[:, 0].str.extract(r'(f\d+)')
     X_names['file_name'] = X_names.loc[:, 0].str.extract(r'(r\d+c\d+f\d+)')
-'''
+    '''
     # create output dir
     if not os.path.exists(argsP.out):
         os.makedirs(argsP.out)
