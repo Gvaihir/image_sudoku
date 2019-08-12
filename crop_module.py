@@ -37,6 +37,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('--img_wd', default = None, help='directory with images. Default - NONE')
 parser.add_argument('--meta_wd', default = None, help='directory with meta data. Default - NONE')
 parser.add_argument('--crop_size', default = 150, type=int, help='Size of a cropped image. Default = 150')
+parser.add_argument('--format', default = 'tif', type=str, help='Image format. Default = TIF')
 parser.add_argument('--pt', default = 1, type=int, help='Plate number. Default - 1')
 parser.add_argument('--rnd', default = False, type=bool, help='Select subset of images per well? Default - FALSE')
 parser.add_argument('--rnd_numb', default = 10, type=int, help='Number of images to select from well. Use with --rnd=True'
@@ -52,19 +53,25 @@ if len(sys.argv)==1:
     parser.print_help(sys.stderr)
     sys.exit(1)
 argsP = parser.parse_args()
-'''
-TODO: make with other input data
-'''
+
+# TODO: make compatible with other input data
+
 if __name__ == "__main__":
 
     # Organize data
     # import meta data
-    X_names = pd.DataFrame(sorted(glob(os.path.join(argsP.img_wd, '*.tif*'))))
+    X_names = pd.DataFrame(sorted(glob(os.path.join(wd, '*.' + argsP.format + '*'))))
+    X_names['base'] = X_names.loc[:, 0].str.split(pat="/", expand=True)[3]
+    X_names['field'] = X_names.loc[:, 0].str.extract(r'(s\d+)')
+    X_names['file_name'] = X_names.loc[:, 0].str.extract(r'([A-Z]\d+_s\d+_w\d+)')
+
+'''SUDOKU
+    X_names = pd.DataFrame(sorted(glob(os.path.join(wd, '*.' + argsP.format + '*'))))
     X_names['plate'] = X_names.loc[:, 0].str.extract(r'(Pt\d+)')
     X_names['well'] = X_names.loc[:, 0].str.extract(r'(r\d+c\d+)')
     X_names['field'] = X_names.loc[:, 0].str.extract(r'(f\d+)')
     X_names['file_name'] = X_names.loc[:, 0].str.extract(r'(r\d+c\d+f\d+)')
-
+'''
     # create output dir
     if not os.path.exists(argsP.out):
         os.makedirs(argsP.out)
@@ -96,10 +103,16 @@ if __name__ == "__main__":
                 continue
 
             # export
+            cv2.imwrite(os.path.join(out, "_".join(['Pt{0:02d}'.format(pt),
+                                                    X_names['base'][i],
+                                                    '{0:04d}.'.format(j) + str(img_format)])), crop_img)
+            '''SUDOKU
             cv2.imwrite(os.path.join(argsP.out, "_".join(['Pt{0:02d}'.format(argsP.pt),
                                                           X_names['well'][i],
                                                           X_names['field'][i],
                                                           '{0:04d}.tif'.format(j)])), crop_img)
+            '''
+
 
         # OPTIONAL export of 25 samples
         if argsP.example:

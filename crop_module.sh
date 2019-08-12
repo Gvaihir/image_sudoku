@@ -3,8 +3,19 @@
 #!/bin/bash
 source activate imgSudoku
 
-pt="Pt11"
-row="r02"
+cwd="/sudoku/train"
+
+for cell_line in $cwd/*;
+do
+  cl=$(basename -- "$cell_line")
+  for plate in $cwd/$cl/*;
+  do
+    pt=$(basename -- "$plate")
+    p=${pt: -1}
+
+
+
+
 
 IMG="/sudoku/screen_converted_rgb/"$pt/$row
 META="/sudoku/meta/"$pt/$row
