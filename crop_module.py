@@ -63,7 +63,7 @@ if __name__ == "__main__":
     # import meta data
 
 # TODO adjust to different naming
-    X_names = pd.DataFrame(sorted(glob(os.path.join(wd, '*.' + argsP.format + '*'))))
+    X_names = pd.DataFrame(sorted(glob(os.path.join(argsP.img_wd, '*.' + argsP.format + '*'))))
     X_names['base'] = X_names.loc[:, 0].str.split(pat="/", expand=True)[3]
     X_names['field'] = X_names.loc[:, 0].str.extract(r'(s\d+)')
     X_names['file_name'] = X_names.loc[:, 0].str.extract(r'([A-Z]\d+_s\d+)')
