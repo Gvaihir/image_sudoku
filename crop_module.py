@@ -123,7 +123,7 @@ if __name__ == "__main__":
             cv2.imwrite(os.path.join(argsP.out, "_".join(['Pt{0:02d}'.format(argsP.pt),
                                                           X_names['base'][i],
                                                           X_names['file_name'][i],
-                                                          '{0:04d}.'.format(j) + str(argsP.img_format)])), crop_img)
+                                                          '{0:04d}.'.format(j) + str(argsP.format)])), crop_img)
             '''
             SUDOKU
             cv2.imwrite(os.path.join(argsP.out, "_".join(['Pt{0:02d}'.format(argsP.pt),
