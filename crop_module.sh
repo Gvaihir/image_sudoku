@@ -3,18 +3,21 @@
 #!/bin/bash
 source activate imgSudoku
 
-pt="Pt11"
-row="r02"
+cwd="/sudoku/train"
+CROP=90
+for cell_line in $cwd/*;
+do
+  cl=$(basename -- "$cell_line")
+  for plate in $cwd/$cl/*;
+  do
+    pt=$(basename -- "$plate")
+    p=${pt: -1}
+    IMG=$cwd/$cl/$pt/converted_rgb
+    META=/sudoku/meta_train/$cl/$pt
+    PLATE=$p
+    OUT=/sudoku/crop_rgb/train/$cl/$pt
 
-IMG="/sudoku/screen_converted_rgb/"$pt/$row
-META="/sudoku/meta/"$pt/$row
-PLATE="11"
-OUT="/sudoku/crop_rgb/"$pt/$row
-
-PYTHON="/home/aogorodnikov/anaconda3/envs/imgSudoku/bin/python"
-
-
-mkdir -p ${OUT}
-
-${PYTHON} crop_module.py --img_wd ${IMG} --meta_wd ${META} --pt ${PLATE} \
-        --example True --example_prob 0.01 --out ${OUT}
+    PYTHON="/home/aogorodnikov/anaconda3/envs/imgsudoku/bin/python"
+    mkdir -p ${OUT}
+    ${PYTHON} crop_module.py --img_wd ${IMG} --meta_wd ${META} --pt ${PLATE} \
+        --example True --example_prob 0.02 --out ${OUT} --crop_size 90 --format "png"
