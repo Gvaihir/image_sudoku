@@ -16,11 +16,14 @@ parser = argparse.ArgumentParser(
     formatter_class=RawTextHelpFormatter,
     epilog="""Merge wisely""")
 parser.add_argument('--wd', default = os.getcwd(), help='directory with images. Default - WD')
-parser.add_argument('--b_coeff', default = 1, type=float, help='FLOAT Pixel intensity coefficient: PI\' = 8bitPI * b_coeff (Default: 1)')
-parser.add_argument('--g_coeff', default = 1, type=float, help='FLOAT Pixel intensity coefficient: PI\' = 8bitPI * g_coeff (Default: 1)')
-parser.add_argument('--r_coeff', default = 1, type=float, help='FLOAT Pixel intensity coefficient: PI\' = 8bitPI * r_coeff (Default: 1)')
-parser.add_argument('--tile_size', default = 256, type=int, help='INT Size of a tile for splitting')
-parser.add_argument('--ntiles', default = 4, type=int, help='INT Number of tiles to split into. Default = 4 (each image will be split into 4)')
+parser.add_argument('--ch_coeff', default = [1,1,1], nargs='+', type=float, help='FLOAT Pixel intensity coefficient: PI\' = 8bitPI * ch_coeff \n'
+                                                                                 '(Default: BLUE: 1; GREEN: 1; RED: 1)')
+parser.add_argument('--chs', default = [1,2,3], nargs='+', type=str, help='STR Channels to use')
+parser.add_argument('--tile_size', default = 2048, type=int, help='INT Size of a tile for splitting')
+parser.add_argument('--ntiles', default = 1, type=int, help='INT Number of tiles to split into. Default = 1 (each image will be split into 1)')
+parser.add_argument('--format', default = 'tif', type=str, help='Image format. Default = TIF')
+parser.add_argument('--name_pattern', default = "r'([AB-Z]\d+_s\d)'", type=str, help='String pattern for image name. Uses Regex Default = ([AB-Z]\d+_s\d)')
+parser.add_argument('--ch_pattern', default = 'ch', type=str, help='String pattern which defines channel. Accepted {ch, w}. Default = CH')
 parser.add_argument('--edge_red', default = False, type=bool, help='BOOL Option to perform LoG on red channel. Default = False')
 parser.add_argument('--laplace_kernel', default = 3, type=int, help='INT Kernel for LoG. Has to be odd. Default = 3')
 parser.add_argument('--selection', default = None, type=str, help='STR Select specific portions of the screen. Accepts tab delimited list of plates/wells. See samplesheet. Default = NONE')
@@ -33,7 +36,7 @@ argsP = parser.parse_args()
 
 # ignoring hidden files
 def listdir_nohidden(path):
-    return [os.path.basename(x) for x in glob.glob(os.path.join(path, '*.tiff'))]
+    return [os.path.basename(x) for x in glob.glob(os.path.join(path, '*.'+argsP.format+'*'))]
 
 
 if __name__ == "__main__":
@@ -41,7 +44,7 @@ if __name__ == "__main__":
     inDir = listdir_nohidden(inPath)
     inDir.sort()
     dfDir = pd.DataFrame(inDir, columns=['Name'])
-    outPath = '/'.join([os.path.dirname(inPath), "converted_rgb"])
+    outPath = os.path.join(inPath, "converted_rgb")
     if not os.path.exists(outPath):
         os.makedirs(outPath)
 
@@ -49,7 +52,7 @@ if __name__ == "__main__":
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(4, 4))
 
     # split file name, extract sample name
-    dfDir["Sample"] = dfDir["Name"].str.split('-', expand=True)[0]
+    dfDir["Sample"] = dfDir["Name"].str.extract(eval(argsP.name_pattern))
     dfDir["Sample_selection"] = dfDir["Sample"].str.split('f', expand=True)[0]
     # use selection ?
     if argsP.selection != None:
@@ -69,9 +72,9 @@ if __name__ == "__main__":
         dfRel = dfDir[dfDir.Sample == x]
 
         # import images for each channel
-        b = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains('ch1'), 'Name'].to_string(index=False)]), -1)
-        g = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains('ch2'), 'Name'].to_string(index=False)]), -1)
-        r = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains('ch3'), 'Name'].to_string(index=False)]), -1)
+        b = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains(argsP.ch_pattern+str(argsP.chs[0])), 'Name'].to_string(index=False).strip()]), -1)
+        g = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains(argsP.ch_pattern+str(argsP.chs[1])), 'Name'].to_string(index=False).strip()]), -1)
+        r = cv2.imread('/'.join([inPath, dfRel.loc[dfRel.Name.str.contains(argsP.ch_pattern+str(argsP.chs[2])), 'Name'].to_string(index=False).strip()]), -1)
 
 
         # work on different channels
@@ -87,6 +90,6 @@ if __name__ == "__main__":
 
 
         pp_combine_export(b_list=b, g_list=g, r_list=r,
-                          b_coeff=argsP.b_coeff, g_coeff=argsP.g_coeff, r_coeff=argsP.r_coeff,
-                          outpath=outPath, imName=x)
+                          b_coeff=argsP.ch_coeff[0], g_coeff=argsP.ch_coeff[1], r_coeff=argsP.ch_coeff[2],
+                          outpath=outPath, imName=x, ext=argsP.format)
 
