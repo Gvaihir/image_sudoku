@@ -9,7 +9,7 @@ import argparse
 from argparse import RawTextHelpFormatter
 import numpy as np
 from keras.models import Sequential, Model, load_model
-from keras.layers import Input, Dense
+from keras.layers import Input, Dense, Conv2D, MaxPooling2D
 from keras.utils import plot_model
 from keras.datasets import mnist
 from keras.optimizers import Adam
@@ -37,6 +37,9 @@ parser.add_argument('-v', '--verbose', action='store_true', help='Image generati
 parser.add_argument('--train', action='store_true', help='Training mode of AAE')
 parser.add_argument('--recons', action='store_true', help='Reconstructing mode of AAE')
 parser.add_argument('--generate', action='store_true', help='Image generation mode from latent space')
+parser.add_argument('--adversarial', action='store_true', help='Use adversarial model')
+parser.add_argument('--conv', action='store_true', help='Use convolutional model. Arch from CellCognition')
+parser.add_argument('--itsr', action='store_true', help='Use ITSR variation of adversarial model')
 parser.add_argument('--plot', action='store_true', help='Plot latent space')
 parser.add_argument('--latent_dim', default=2, type=int, help='Dimensionality of a latent space')
 
@@ -51,29 +54,76 @@ argsP = parser.parse_args()
 
 
 def create_model(input_dim, latent_dim, verbose=False, save_graph=False):
+    '''
+    Creates model
+    :param input_dim: tuple, shape of the input data (format h, w, ch)
+    :param latent_dim: int, number of latent dimensions
+    :param verbose: bool, chatty
+    :param save_graph: bool, saves latent representation. Work only for 2d latent
+    :return: model
+    '''
+
     autoencoder_input = Input(shape=(input_dim,))
     generator_input = Input(shape=(input_dim,))
 
-    encoder = Sequential()
-    encoder.add(Dense(1000, input_shape=(input_dim,), activation='relu'))
-    encoder.add(Dense(1000, activation='relu'))
-    encoder.add(Dense(latent_dim, activation=None))
+    if argsP.conv:
+        # Assemble convolutional model
+        encoder = Sequential()
+        encoder.add(Conv2D(16, kernel_size=(5,5), input_shape=input_dim, padding='same', activation='relu', data_format="channels_last"))
+        encoder.add(MaxPooling2D(pool_size=(2, 2)))
+        encoder.add(Conv2D(16, kernel_size=(3, 3), padding='same', activation='relu'))
+        encoder.add(MaxPooling2D(pool_size=(2, 2)))
+        encoder.add(Dense(1000, activation='relu')) # different, was 256
+        encoder.add(Dense(1000, activation='relu')) # different, didn't exist
+        encoder.add(Dense(latent_dim, activation=None) # different (was reshaping to 64D)
 
-    decoder = Sequential()
-    decoder.add(Dense(1000, input_shape=(latent_dim,), activation='relu'))
-    decoder.add(Dense(1000, activation='relu'))
-    decoder.add(Dense(input_dim, activation='sigmoid'))
+        decoder = Sequential()
+        decoder.add(Dense(1000, input_shape=(latent_dim,), activation='relu'))
+        decoder.add(Dense(1000, activation='relu'))
+        decoder.add(Dense(1600, activation='relu'))
+        decoder.add(Reshape((16,10,10)))
+        decoder.add(UpSampling2D((2, 2)))
+        decoder.add(Cnonv2DTranspose(16, kernel_size=(3, 3), padding='same', activation='relu'))
+        decoder.add(UpSampling2D((2,2)))
+        decoder.add(Cnonv2DTranspose(1, kernel_size=(5, 5), padding='same', activation='sigmoid')) # Relu in CellCognition
 
-    if FLAGS.adversarial:
-        discriminator = Sequential()
-        discriminator.add(Dense(1000, input_shape=(latent_dim,), activation='relu'))
-        discriminator.add(Dense(1000, activation='relu'))
-        discriminator.add(Dense(1, activation='sigmoid'))
+        if argsP.adversarial:
+            discriminator = Sequential()
+            discriminator.add(Dense(1000, input_shape=(latent_dim,), activation='relu'))
+            discriminator.add(Dense(1000, activation='relu'))
+            discriminator.add(Dense(1600, activation='relu'))
+            discriminator.add(Reshape((16, 10, 10)))
+            discriminator.add(UpSampling2D((2, 2)))
+            discriminator.add(Cnonv2DTranspose(16, kernel_size=(3, 3), padding='same', activation='relu'))
+            discriminator.add(UpSampling2D((2, 2)))
+            discriminator.add(
+                Cnonv2DTranspose(1, kernel_size=(5, 5), padding='same', activation='sigmoid'))  # Relu in CellCognition
+
+
+
+
+    else:
+        encoder = Sequential()
+        encoder.add(Dense(1000, input_shape=(input_dim,), activation='relu'))
+        encoder.add(Dense(1000, activation='relu'))
+        encoder.add(Dense(latent_dim, activation=None))
+
+        decoder = Sequential()
+        decoder.add(Dense(1000, input_shape=(latent_dim,), activation='relu'))
+        decoder.add(Dense(1000, activation='relu'))
+        decoder.add(Dense(input_dim, activation='sigmoid'))
+
+        if argsP.adversarial:
+            discriminator = Sequential()
+            discriminator.add(Dense(1000, input_shape=(latent_dim,), activation='relu'))
+            discriminator.add(Dense(1000, activation='relu'))
+            discriminator.add(Dense(1, activation='sigmoid'))
+
 
     autoencoder = Model(autoencoder_input, decoder(encoder(autoencoder_input)))
     autoencoder.compile(optimizer=Adam(lr=1e-4), loss="mean_squared_error")
 
-    if FLAGS.adversarial:
+    if argsP.adversarial:
         discriminator.compile(optimizer=Adam(lr=1e-4), loss="binary_crossentropy")
         discriminator.trainable = False
         generator = Model(generator_input, discriminator(encoder(generator_input)))
@@ -82,7 +132,7 @@ def create_model(input_dim, latent_dim, verbose=False, save_graph=False):
     if verbose:
         print("Autoencoder Architecture")
         print(autoencoder.summary())
-        if FLAGS.adversarial:
+        if argsP.adversarial:
             print("Discriminator Architecture")
             print(discriminator.summary())
             print("Generator Architecture")
@@ -90,18 +140,18 @@ def create_model(input_dim, latent_dim, verbose=False, save_graph=False):
 
     if save_graph:
         plot_model(autoencoder, to_file="autoencoder_graph.png")
-        if FLAGS.adversarial:
+        if argsP.adversarial:
             plot_model(discriminator, to_file="discriminator_graph.png")
             plot_model(generator, to_file="generator_graph.png")
 
-    if FLAGS.adversarial:
+    if argsP.adversarial:
         return autoencoder, discriminator, generator, encoder, decoder
     else:
         return autoencoder, None, None, encoder, decoder
 
 
 def train(n_samples, batch_size, n_epochs):
-    autoencoder, discriminator, generator, encoder, decoder = create_model(input_dim=784, latent_dim=FLAGS.latent_dim)
+    autoencoder, discriminator, generator, encoder, decoder = create_model(input_dim=784, latent_dim=argsP.latent_dim)
     (x_train, y_train), (x_test, y_test) = mnist.load_data()
     # Get n_samples/10 samples from each class
     x_classes = {}
@@ -121,7 +171,7 @@ def train(n_samples, batch_size, n_epochs):
     past = datetime.now()
     for epoch in np.arange(1, n_epochs + 1):
         autoencoder_losses = []
-        if FLAGS.adversarial:
+        if argsP.adversarial:
             discriminator_losses = []
             generator_losses = []
         rand_x.shuffle(x)
@@ -132,9 +182,9 @@ def train(n_samples, batch_size, n_epochs):
             samples = x[start:end]
             autoencoder_history = autoencoder.fit(x=samples, y=samples, epochs=1, batch_size=batch_size,
                                                   validation_split=0.0, verbose=0)
-            if FLAGS.adversarial:
+            if argsP.adversarial:
                 fake_latent = encoder.predict(samples)
-                discriminator_input = np.concatenate((fake_latent, np.random.randn(batch_size, FLAGS.latent_dim) * 5.))
+                discriminator_input = np.concatenate((fake_latent, np.random.randn(batch_size, argsP.latent_dim) * 5.))
                 discriminator_labels = np.concatenate((np.zeros((batch_size, 1)), np.ones((batch_size, 1))))
                 discriminator_history = discriminator.fit(x=discriminator_input, y=discriminator_labels, epochs=1,
                                                           batch_size=batch_size, validation_split=0.0, verbose=0)
@@ -142,7 +192,7 @@ def train(n_samples, batch_size, n_epochs):
                                                   batch_size=batch_size, validation_split=0.0, verbose=0)
 
             autoencoder_losses.append(autoencoder_history.history["loss"])
-            if FLAGS.adversarial:
+            if argsP.adversarial:
                 discriminator_losses.append(discriminator_history.history["loss"])
                 generator_losses.append(generator_history.history["loss"])
         now = datetime.now()
@@ -245,7 +295,7 @@ def plot(n_samples):
     normalize = colors.Normalize(0., 255.)
     x = normalize(x)
     latent = encoder.predict(x)
-    if FLAGS.latent_dim > 2:
+    if argsP.latent_dim > 2:
         tsne = TSNE()
         print("\nFitting t-SNE, this will take awhile...")
         latent = tsne.fit_transform(latent)
@@ -263,26 +313,26 @@ def plot(n_samples):
 
 def main(argv):
     global desc
-    if FLAGS.adversarial:
+    if argsP.adversarial:
         desc = "aae"
     else:
         desc = "regular"
-    if FLAGS.train:
-        train(n_samples=FLAGS.train_samples, batch_size=FLAGS.batchsize, n_epochs=FLAGS.epochs)
-    elif FLAGS.reconstruct:
+    if argsP.train:
+        train(n_samples=argsP.train_samples, batch_size=argsP.batchsize, n_epochs=argsP.epochs)
+    elif argsP.reconstruct:
         reconstruct(n_samples=FLAGS.test_samples)
-    elif FLAGS.generate:
-        if FLAGS.latent_vec:
+    elif argsP.generate:
+        if argsP.latent_vec:
             assert len(
-                FLAGS.latent_vec) == FLAGS.latent_dim, "Latent vector provided is of dim {}; required dim is {}".format(
-                len(FLAGS.latent_vec), FLAGS.latent_dim)
-            generate(FLAGS.latent_vec)
+                argsP.latent_vec) == argsP.latent_dim, "Latent vector provided is of dim {}; required dim is {}".format(
+                len(argsP.latent_vec), argsP.latent_dim)
+            generate(argsP.latent_vec)
         else:
             generate()
-    elif FLAGS.generate_grid:
+    elif argsP.generate_grid:
         generate_grid()
-    elif FLAGS.plot:
-        plot(FLAGS.test_samples)
+    elif argsP.plot:
+        plot(argsP.test_samples)
 
 
 if __name__ == "__main__":
