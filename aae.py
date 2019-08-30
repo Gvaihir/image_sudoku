@@ -9,7 +9,8 @@ import argparse
 from argparse import RawTextHelpFormatter
 import numpy as np
 from keras.models import Sequential, Model, load_model
-from keras.layers import Input, Dense, Conv2D, MaxPooling2D
+from keras.layers import Input, Dense, Conv2D, MaxPooling2D, Reshape, UpSampling2D, Conv2DTranspose, Flatten
+from keras.preprocessing.image import ImageDataGenerator
 from keras.utils import plot_model
 from keras.datasets import mnist
 from keras.optimizers import Adam
@@ -56,61 +57,68 @@ argsP = parser.parse_args()
 def create_model(input_dim, latent_dim, verbose=False, save_graph=False):
     '''
     Creates model
-    :param input_dim: tuple, shape of the input data (format h, w, ch)
     :param latent_dim: int, number of latent dimensions
     :param verbose: bool, chatty
     :param save_graph: bool, saves latent representation. Work only for 2d latent
-    :return: model
+    :return: autoencoder, (discriminator), (generator), encoder, decoder
     '''
 
-    autoencoder_input = Input(shape=(input_dim,))
-    generator_input = Input(shape=(input_dim,))
+    autoencoder_input = Input(shape=(80,80,3))
+    generator_input = Input(shape=(80,80,3))
 
     if argsP.conv:
         # Assemble convolutional model
         encoder = Sequential()
-        encoder.add(Conv2D(16, kernel_size=(5,5), input_shape=input_dim, padding='same', activation='relu', data_format="channels_last"))
+        encoder.add(Conv2D(16, kernel_size=(5,5), input_shape=(80,80,3), padding='same', activation='relu', data_format="channels_last"))
         encoder.add(MaxPooling2D(pool_size=(2, 2)))
         encoder.add(Conv2D(16, kernel_size=(3, 3), padding='same', activation='relu'))
         encoder.add(MaxPooling2D(pool_size=(2, 2)))
+        encoder.add(Conv2D(16, kernel_size=(3, 3), padding='same', activation='relu'))
+        encoder.add(MaxPooling2D(pool_size=(2, 2)))
+        encoder.add(Flatten())
         encoder.add(Dense(1000, activation='relu')) # different, was 256
         encoder.add(Dense(1000, activation='relu')) # different, didn't exist
-        encoder.add(Dense(latent_dim, activation=None) # different (was reshaping to 64D)
+        encoder.add(Dense(latent_dim, activation=None)) # different (was reshaping to 64D)
 
         decoder = Sequential()
         decoder.add(Dense(1000, input_shape=(latent_dim,), activation='relu'))
         decoder.add(Dense(1000, activation='relu'))
         decoder.add(Dense(1600, activation='relu'))
-        decoder.add(Reshape((16,10,10)))
+        decoder.add(Reshape((10,10,16)))
         decoder.add(UpSampling2D((2, 2)))
-        decoder.add(Cnonv2DTranspose(16, kernel_size=(3, 3), padding='same', activation='relu'))
-        decoder.add(UpSampling2D((2,2)))
-        decoder.add(Cnonv2DTranspose(1, kernel_size=(5, 5), padding='same', activation='sigmoid')) # Relu in CellCognition
+        decoder.add(Conv2DTranspose(16, kernel_size=(3, 3), padding='same', activation='relu'))
+        decoder.add(UpSampling2D((2, 2)))
+        decoder.add(Conv2DTranspose(16, kernel_size=(3, 3), padding='same', activation='relu'))
+        decoder.add(UpSampling2D((2, 2)))
+        decoder.add(Conv2DTranspose(3, kernel_size=(5, 5), padding='same', activation='sigmoid')) # Relu in CellCognition
 
         if argsP.adversarial:
             discriminator = Sequential()
             discriminator.add(Dense(1000, input_shape=(latent_dim,), activation='relu'))
             discriminator.add(Dense(1000, activation='relu'))
             discriminator.add(Dense(1600, activation='relu'))
-            discriminator.add(Reshape((16, 10, 10)))
+            discriminator.add(Reshape((10, 10, 16)))
             discriminator.add(UpSampling2D((2, 2)))
-            discriminator.add(Cnonv2DTranspose(16, kernel_size=(3, 3), padding='same', activation='relu'))
+            discriminator.add(Conv2DTranspose(16, kernel_size=(3, 3), padding='same', activation='relu'))
+            discriminator.add(UpSampling2D((2, 2)))
+            discriminator.add(Conv2DTranspose(16, kernel_size=(3, 3), padding='same', activation='relu'))
             discriminator.add(UpSampling2D((2, 2)))
             discriminator.add(
-                Cnonv2DTranspose(1, kernel_size=(5, 5), padding='same', activation='sigmoid'))  # Relu in CellCognition
+                Conv2DTranspose(3, kernel_size=(5, 5), padding='same', activation='sigmoid'))  # Relu in CellCognition
 
 
 
 
     else:
         encoder = Sequential()
-        encoder.add(Dense(1000, input_shape=(input_dim,), activation='relu'))
+        encoder.add(Dense(1000, input_shape=input_dim, activation='relu'))
         encoder.add(Dense(1000, activation='relu'))
         encoder.add(Dense(latent_dim, activation=None))
 
         decoder = Sequential()
         decoder.add(Dense(1000, input_shape=(latent_dim,), activation='relu'))
-        decoder.add(Dense(1000, activation='relu'))
+        decoder.add(Dense(1600, activation='relu'))
+        decoder.add(Reshape((16, 10, 10)))
         decoder.add(Dense(input_dim, activation='sigmoid'))
 
         if argsP.adversarial:
@@ -118,7 +126,6 @@ def create_model(input_dim, latent_dim, verbose=False, save_graph=False):
             discriminator.add(Dense(1000, input_shape=(latent_dim,), activation='relu'))
             discriminator.add(Dense(1000, activation='relu'))
             discriminator.add(Dense(1, activation='sigmoid'))
-
 
     autoencoder = Model(autoencoder_input, decoder(encoder(autoencoder_input)))
     autoencoder.compile(optimizer=Adam(lr=1e-4), loss="mean_squared_error")
@@ -150,23 +157,20 @@ def create_model(input_dim, latent_dim, verbose=False, save_graph=False):
         return autoencoder, None, None, encoder, decoder
 
 
-def train(n_samples, batch_size, n_epochs):
-    autoencoder, discriminator, generator, encoder, decoder = create_model(input_dim=784, latent_dim=argsP.latent_dim)
-    (x_train, y_train), (x_test, y_test) = mnist.load_data()
-    # Get n_samples/10 samples from each class
-    x_classes = {}
-    y_classes = {}
-    for i in np.arange(10):
-        x_classes[i] = x_train[np.where(y_train == i), :, :][0][:int(n_samples / 10), :, :]
-        y_classes[i] = np.ones(int(n_samples / 10)) * i
-    x = np.concatenate((list(x_classes.values())))
-    y = np.concatenate((list(y_classes.values())))
-    x = x.reshape(-1, 784)
-    normalize = colors.Normalize(0., 255.)
-    x = normalize(x)
+def train(wd, batch_size, latent_dim, n_epochs):
+    autoencoder, discriminator, generator, encoder, decoder = create_model(input_dim=argsP.input_dim, latent_dim=argsP.latent_dim)
+    data_loader = ImageDataGenerator(
+        featurewise_center=True,
+        featurewise_std_normalization=True,
+        shear_range=0.2,
+        zoom_range=0.2,
+        horizontal_flip=True)
 
-    rand_x = np.random.RandomState(42)
-    rand_y = np.random.RandomState(42)
+    train_generator = data_loader.flow_from_directory(
+        wd,
+        target_size=(80, 80),
+        batch_size=batch_size,
+        class_mode='input')
 
     past = datetime.now()
     for epoch in np.arange(1, n_epochs + 1):
@@ -174,21 +178,16 @@ def train(n_samples, batch_size, n_epochs):
         if argsP.adversarial:
             discriminator_losses = []
             generator_losses = []
-        rand_x.shuffle(x)
-        rand_y.shuffle(y)
-        for batch in np.arange(len(x) / batch_size):
-            start = int(batch * batch_size)
-            end = int(start + batch_size)
-            samples = x[start:end]
-            autoencoder_history = autoencoder.fit(x=samples, y=samples, epochs=1, batch_size=batch_size,
-                                                  validation_split=0.0, verbose=0)
+
+            autoencoder_history = autoencoder.fit_generator(train_generator, epochs=1)
+
             if argsP.adversarial:
-                fake_latent = encoder.predict(samples)
-                discriminator_input = np.concatenate((fake_latent, np.random.randn(batch_size, argsP.latent_dim) * 5.))
+                fake_latent = encoder.predict_generator(train_generator)
+                discriminator_input = np.concatenate((fake_latent, np.random.randn(batch_size, latent_dim) * 5.))
                 discriminator_labels = np.concatenate((np.zeros((batch_size, 1)), np.ones((batch_size, 1))))
                 discriminator_history = discriminator.fit(x=discriminator_input, y=discriminator_labels, epochs=1,
                                                           batch_size=batch_size, validation_split=0.0, verbose=0)
-                generator_history = generator.fit(x=samples, y=np.ones((batch_size, 1)), epochs=1,
+                generator_history = generator.fit_generator(train_generator, y=np.ones((batch_size, 1)), epochs=1,
                                                   batch_size=batch_size, validation_split=0.0, verbose=0)
 
             autoencoder_losses.append(autoencoder_history.history["loss"])
@@ -198,7 +197,7 @@ def train(n_samples, batch_size, n_epochs):
         now = datetime.now()
         print("\nEpoch {}/{} - {:.1f}s".format(epoch, n_epochs, (now - past).total_seconds()))
         print("Autoencoder Loss: {}".format(np.mean(autoencoder_losses)))
-        if FLAGS.adversarial:
+        if argsP.adversarial:
             print("Discriminator Loss: {}".format(np.mean(discriminator_losses)))
             print("Generator Loss: {}".format(np.mean(generator_losses)))
         past = now
@@ -208,23 +207,25 @@ def train(n_samples, batch_size, n_epochs):
             # autoencoder.save('{}_autoencoder.h5'.format(desc))
             encoder.save('{}_encoder.h5'.format(desc))
             decoder.save('{}_decoder.h5'.format(desc))
-        # if FLAGS.adversarial:
-        # 	discriminator.save('{}_discriminator.h5'.format(desc))
-        # 	generator.save('{}_generator.h5'.format(desc))
+        if argsP.adversarial:
+            discriminator.save('{}_discriminator.h5'.format(desc))
+         	generator.save('{}_generator.h5'.format(desc))
 
-    # autoencoder.save('{}_autoencoder.h5'.format(desc))
     encoder.save('{}_encoder.h5'.format(desc))
     decoder.save('{}_decoder.h5'.format(desc))
+    if argsP.adversarial:
+        discriminator.save('{}_discriminator.h5'.format(desc))
+        generator.save('{}_generator.h5'.format(desc))
 
 
-# if FLAGS.adversarial:
-# discriminator.save('{}_discriminator.h5'.format(desc))
-# generator.save('{}_generator.h5'.format(desc))
+
+
+# TODO: all the following
 
 def reconstruct(n_samples):
     encoder = load_model('{}_encoder.h5'.format(desc))
     decoder = load_model('{}_decoder.h5'.format(desc))
-    (x_train, y_train), (x_test, y_test) = mnist.load_data()
+
     choice = np.random.choice(np.arange(n_samples))
     original = x_test[choice].reshape(1, 784)
     normalize = colors.Normalize(0., 255.)
