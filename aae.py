@@ -10,7 +10,7 @@ from argparse import RawTextHelpFormatter
 import numpy as np
 import os
 
-# kears
+# keras
 from keras.models import Sequential, Model, load_model
 from keras.layers import Input, Dense, Conv2D, MaxPooling2D, Reshape, UpSampling2D, Conv2DTranspose, Flatten, BatchNormalization
 from keras.preprocessing.image import ImageDataGenerator
@@ -81,21 +81,22 @@ def create_model(input_dim, latent_dim, verbose=False, save_graph=False):
     if argsP.conv:
         # Assemble convolutional model
         encoder = Sequential()
-        encoder.add(Conv2D(16, kernel_size=(5,5), input_shape=(80,80,3), padding='same', activation='relu', data_format="channels_last"))
+        encoder.add(Conv2D(16, kernel_size=(5, 5), input_shape=(80, 80, 3), padding='same', activation='relu',
+                           data_format="channels_last"))
         encoder.add(MaxPooling2D(pool_size=(2, 2)))
-        encoder.add(BatchNormalization, axis=-1, momentum=0.9, epsilon=0.001)
+        encoder.add(BatchNormalization(axis=-1, momentum=0.9, epsilon=0.001))
         encoder.add(Conv2D(16, kernel_size=(3, 3), padding='same', activation='relu'))
         encoder.add(MaxPooling2D(pool_size=(2, 2)))
-        encoder.add(BatchNormalization, axis=-1, momentum=0.9, epsilon=0.001)
+        encoder.add(BatchNormalization(axis=-1, momentum=0.9, epsilon=0.001))
         encoder.add(Conv2D(16, kernel_size=(3, 3), padding='same', activation='relu'))
         encoder.add(MaxPooling2D(pool_size=(2, 2)))
-        encoder.add(BatchNormalization, axis=-1, momentum=0.9, epsilon=0.001)
+        encoder.add(BatchNormalization(axis=-1, momentum=0.9, epsilon=0.001))
         encoder.add(Flatten())
-        encoder.add(Dense(1000, activation='relu')) # different, was 256
-        encoder.add(BatchNormalization, axis=-1, momentum=0.9, epsilon=0.001)
-        encoder.add(Dense(1000, activation='relu')) # different, didn't exist
-        encoder.add(BatchNormalization, axis=-1, momentum=0.9, epsilon=0.001)
-        encoder.add(Dense(latent_dim, activation=None)) # different (was reshaping to 64D)
+        encoder.add(Dense(1000, activation='relu'))  # different, was 256
+        encoder.add(BatchNormalization(axis=-1, momentum=0.9, epsilon=0.001))
+        encoder.add(Dense(1000, activation='relu'))  # different, didn't exist
+        encoder.add(BatchNormalization(axis=-1, momentum=0.9, epsilon=0.001))
+        encoder.add(Dense(latent_dim, activation=None))  # different (was reshaping to 64D)
 
         decoder = Sequential()
         decoder.add(Dense(1000, input_shape=(latent_dim,), activation='relu'))
@@ -129,9 +130,9 @@ def create_model(input_dim, latent_dim, verbose=False, save_graph=False):
     else:
         encoder = Sequential()
         encoder.add(Dense(1000, input_shape=input_dim, activation='relu'))
-        encoder.add(BatchNormalization, axis=-1, momentum=0.9, epsilon=0.001)
+        encoder.add(BatchNormalization(axis=-1, momentum=0.9, epsilon=0.001))
         encoder.add(Dense(1000, activation='relu'))
-        encoder.add(BatchNormalization, axis=-1, momentum=0.9, epsilon=0.001)
+        encoder.add(BatchNormalization(axis=-1, momentum=0.9, epsilon=0.001))
         encoder.add(Dense(latent_dim, activation=None))
 
         decoder = Sequential()
@@ -198,21 +199,27 @@ def train(wd, batch_size, latent_dim, n_epochs):
             discriminator_losses = []
             generator_losses = []
 
-            autoencoder_history = autoencoder.fit_generator(train_data, epochs=1)
+        autoencoder_history = autoencoder.fit_generator(train_data, epochs=1)
 
-            if argsP.adversarial:
-                fake_latent = encoder.predict_generator(train_data)
-                discriminator_input = np.concatenate((fake_latent, np.random.randn(batch_size, latent_dim) * 5.))
-                discriminator_labels = np.concatenate((np.zeros((batch_size, 1)), np.ones((batch_size, 1))))
-                discriminator_history = discriminator.fit(x=discriminator_input, y=discriminator_labels, epochs=1,
-                                                          batch_size=batch_size, validation_split=0.0, verbose=0)
-                generator_history = generator.fit_generator(train_data, y=np.ones((batch_size, 1)), epochs=1,
-                                                  batch_size=batch_size, validation_split=0.0, verbose=0)
+        if argsP.adversarial:
+            fake_latent = encoder.predict_generator(train_data)
+            discriminator_input = np.concatenate((fake_latent, np.random.randn(batch_size, latent_dim) * 5.))
+            discriminator_labels = np.concatenate((np.zeros((batch_size, 1)), np.ones((batch_size, 1))))
+            discriminator_history = discriminator.fit(x=discriminator_input, y=discriminator_labels, epochs=1,
+                                                      batch_size=batch_size, validation_split=0.0, verbose=0)
+            generator_history = generator.fit_generator(train_data, y=np.ones((batch_size, 1)), epochs=1,
+                                              batch_size=batch_size, validation_split=0.0, verbose=0)
 
-            autoencoder_losses.append(autoencoder_history.history["loss"])
-            if argsP.adversarial:
-                discriminator_losses.append(discriminator_history.history["loss"])
-                generator_losses.append(generator_history.history["loss"])
+        autoencoder_losses.append(autoencoder_history.history["loss"])
+        # WandB logging
+        wandb.log({"phase": epoch,
+                   "ae_train_loss": autoencoder_history.history["loss"],
+                   "ae_train_acc": autoencoder_history.history["acc"],
+                   "ae_val_loss": autoencoder_history.history["val_loss"],
+                   "ae_val_acc": autoencoder_history.history["val_acc"]}, step=epoch)
+        if argsP.adversarial:
+            discriminator_losses.append(discriminator_history.history["loss"])
+            generator_losses.append(generator_history.history["loss"])
 
             # WandB logging
             wandb.log({"phase": epoch,
