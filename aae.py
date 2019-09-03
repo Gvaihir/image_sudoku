@@ -8,19 +8,27 @@ except:
 import argparse
 from argparse import RawTextHelpFormatter
 import numpy as np
+import os
+
+# kears
 from keras.models import Sequential, Model, load_model
 from keras.layers import Input, Dense, Conv2D, MaxPooling2D, Reshape, UpSampling2D, Conv2DTranspose, Flatten, BatchNormalization
 from keras.preprocessing.image import ImageDataGenerator
 from keras.utils import plot_model
-from keras.datasets import mnist
 from keras.optimizers import Adam
-import argparse
+
+
+from absl import app
+
+# logging
+import wandb
+from datetime import datetime
+
+# plotting and other
 import matplotlib.pyplot as plt
 from matplotlib import gridspec, colors
-from datetime import datetime
 from sklearn.manifold import TSNE
 from absl import flags
-from absl import app
 
 parser = argparse.ArgumentParser(
     description='''Adversarial autoencoder from Makhzani, Alireza, et al. "Adversarial autoencoders." arXiv preprint arXiv:1511.05644 (2015)''',
@@ -65,6 +73,10 @@ def create_model(input_dim, latent_dim, verbose=False, save_graph=False):
 
     autoencoder_input = Input(shape=(80,80,3))
     generator_input = Input(shape=(80,80,3))
+
+    # monitoring with WandB
+    wandb.init(config=argsP)
+    wandb.config.update(argsP)  # adds all of the arguments as config variables
 
     if argsP.conv:
         # Assemble convolutional model
@@ -135,13 +147,13 @@ def create_model(input_dim, latent_dim, verbose=False, save_graph=False):
             discriminator.add(Dense(1, activation='sigmoid'))
 
     autoencoder = Model(autoencoder_input, decoder(encoder(autoencoder_input)))
-    autoencoder.compile(optimizer=Adam(lr=1e-4), loss="mean_squared_error")
+    autoencoder.compile(optimizer=Adam(lr=1e-4), loss="mean_squared_error", metrics=['accuracy'])
 
     if argsP.adversarial:
-        discriminator.compile(optimizer=Adam(lr=1e-4), loss="binary_crossentropy")
+        discriminator.compile(optimizer=Adam(lr=1e-4), loss="binary_crossentropy", metrics=['accuracy'])
         discriminator.trainable = False
         generator = Model(generator_input, discriminator(encoder(generator_input)))
-        generator.compile(optimizer=Adam(lr=1e-4), loss="binary_crossentropy")
+        generator.compile(optimizer=Adam(lr=1e-4), loss="binary_crossentropy", metrics=['accuracy'])
 
     if verbose:
         print("Autoencoder Architecture")
@@ -201,34 +213,40 @@ def train(wd, batch_size, latent_dim, n_epochs):
             if argsP.adversarial:
                 discriminator_losses.append(discriminator_history.history["loss"])
                 generator_losses.append(generator_history.history["loss"])
-        now = datetime.now()
-        print("\nEpoch {}/{} - {:.1f}s".format(epoch, n_epochs, (now - past).total_seconds()))
-        print("Autoencoder Loss: {}".format(np.mean(autoencoder_losses)))
-        if argsP.adversarial:
-            print("Discriminator Loss: {}".format(np.mean(discriminator_losses)))
-            print("Generator Loss: {}".format(np.mean(generator_losses)))
-        past = now
+
+            # WandB logging
+            wandb.log({"phase": epoch,
+                       "ae_train_loss": autoencoder_history.history["loss"],
+                       "ae_train_acc": autoencoder_history.history["acc"],
+                       "ae_val_loss": autoencoder_history.history["val_loss"],
+                       "ae_val_acc": autoencoder_history.history["val_acc"],
+
+                       "gen_train_loss": generator_history.history["loss"],
+                       "gen_train_acc": generator_history.history["acc"],
+                       "gen_val_loss": generator_history.history["val_loss"],
+                       "gen_val_acc": generator_history.history["val_acc"]}, step=epoch)
+
 
         if epoch % 50 == 0:
             print("\nSaving models...")
             # autoencoder.save('{}_autoencoder.h5'.format(desc))
-            encoder.save('{}_encoder.h5'.format(desc))
-            decoder.save('{}_decoder.h5'.format(desc))
+            encoder.save(os.path.join(argsP.out, 'encoder.h5'))
+            decoder.save(os.path.join(argsP.out, 'decoder.h5'))
         if argsP.adversarial:
-            discriminator.save('{}_discriminator.h5'.format(desc))
-         	generator.save('{}_generator.h5'.format(desc))
+            discriminator.save(os.path.join(argsP.out, 'discriminator.h5'))
+            generator.save(os.path.join(argsP.out, 'generator.h5'))
 
-    encoder.save('{}_encoder.h5'.format(desc))
-    decoder.save('{}_decoder.h5'.format(desc))
+    encoder.save(os.path.join(argsP.out, 'encoder.h5'))
+    decoder.save(os.path.join(argsP.out, 'decoder.h5'))
     if argsP.adversarial:
-        discriminator.save('{}_discriminator.h5'.format(desc))
-        generator.save('{}_generator.h5'.format(desc))
+        discriminator.save(os.path.join(argsP.out, 'discriminator.h5'))
+        generator.save(os.path.join(argsP.out, 'generator.h5'))
 
 
 
 
 # TODO: all the following
-
+'''
 def reconstruct(n_samples):
     encoder = load_model('{}_encoder.h5'.format(desc))
     decoder = load_model('{}_decoder.h5'.format(desc))
@@ -318,6 +336,8 @@ def plot(n_samples):
 
 
 # fig.savefig("images/{}_latent.png".format(desc), bbox_inches="tight", dpi=300)
+'''
+
 
 def main(argv):
     global desc
