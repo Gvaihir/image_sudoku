@@ -390,5 +390,5 @@ if __name__ == "__main__":
               latent_dim=argsP.latent_dim, n_epochs=argsP.epoch,
               autoencoder=autoencoder, discriminator=discriminator,
               generator=generator, encoder=encoder, decoder=decoder,
-              adversarial=argsP.adversarial)
+              adversarial=True)
 
