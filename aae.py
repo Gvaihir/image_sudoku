@@ -234,6 +234,8 @@ def train(train_data, out, latent_dim, n_epochs, autoencoder, discriminator, gen
                 generator_history.history["acc"]
             ))
 
+            print("EPOCH {} DONE".format(epoch))
+
             # WandB logging
             wandb.log({"phase": epoch,
                        "ae_train_loss": autoencoder_history.history["loss"],
