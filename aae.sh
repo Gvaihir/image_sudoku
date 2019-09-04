@@ -7,7 +7,7 @@ img_wd=/home/aogorodnikov/data_aae
 epoch=1500
 batch=64
 out=/home/aogorodnikov/aae/
-input_dim=(104,104,3)
+input_dim=104 104 3
 latent_dim=32
 
 mkdir -p $out

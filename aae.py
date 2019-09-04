@@ -40,7 +40,7 @@ parser.add_argument('-e', '--epoch', default=100, type=int, help='Number of trai
 parser.add_argument('-b', '--batch', default=256, type=int, help='Batch size')
 parser.add_argument('-o', '--out', default=os.path.join(os.getcwd(), 'aae_model'), help='output dir. Default - WD/aae')
 parser.add_argument('-v', '--verbose', action='store_true', help='Image generation mode from latent space')
-parser.add_argument('--input_dim', default=(144, 144, 3), type=tuple, help='Dimensionality of an input image')
+parser.add_argument('--input_dim', default=[144, 144, 3], nargs='+', type=int, help='Dimensionality of an input image')
 parser.add_argument('--latent_dim', default=128, type=int, help='Dimensionality of a latent space')
 
 
@@ -362,8 +362,10 @@ if __name__ == "__main__":
     wandb.init(config=argsP)
     wandb.config.update(argsP)  # adds all of the arguments as config variables
 
+    # input_dim make tuple
+    input_dim = tuple(argsP.input_dim)
     # CREATE MODELS
-    autoencoder, discriminator, generator, encoder, decoder = create_model(input_dim=argsP.input_dim,
+    autoencoder, discriminator, generator, encoder, decoder = create_model(input_dim=input_dim,
                                                                            latent_dim=argsP.latent_dim,
                                                                            verbose=argsP.verbose, save_graph=False,
                                                                            conv=argsP.conv,
@@ -378,7 +380,7 @@ if __name__ == "__main__":
 
     train_data = data_loader.flow_from_directory(
         argsP.img_wd,
-        target_size=(argsP.input_dim[0], argsP.input_dim[0]),
+        target_size=(input_dim[0], input_dim[0]),
         batch_size=argsP.batch,
         class_mode='input')
 
