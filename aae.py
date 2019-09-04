@@ -377,7 +377,7 @@ if __name__ == "__main__":
         horizontal_flip=True)
 
     train_data = data_loader.flow_from_directory(
-        argsP.wd,
+        argsP.img_wd,
         target_size=(argsP.input_dim[0], argsP.input_dim[0]),
         batch_size=argsP.batch,
         class_mode='input')
