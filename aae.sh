@@ -5,7 +5,7 @@ source activate imgSudoku
 
 IMG_WD=/home/aogorodnikov/data_aae
 EPOCH=1500
-BATCH=64
+BATCH=32
 OUT=/home/aogorodnikov/aae/
 latent_dim=32
 
