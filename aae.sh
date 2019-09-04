@@ -3,7 +3,7 @@
 # Copyright (c) 2018-present, Anton (Gvaihir) Ogorodnikov, Ye lab UCSF.
 source activate imgSudoku
 
-img_wd=
+img_wd=/home/aogorodnikov/data_aae
 epoch=1500
 batch=64
 out=/home/aogorodnikov/aae/
