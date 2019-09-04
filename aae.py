@@ -11,18 +11,14 @@ import numpy as np
 import os
 
 # keras
-from keras.models import Sequential, Model, load_model
+from keras.models import Sequential, Model
 from keras.layers import Input, Dense, Conv2D, MaxPooling2D, Reshape, UpSampling2D, Conv2DTranspose, Flatten, BatchNormalization
 from keras.preprocessing.image import ImageDataGenerator
 from keras.utils import plot_model
 from keras.optimizers import Adam
 
-
-from absl import app
-
 # logging
 import wandb
-from datetime import datetime
 
 # plotting and other
 import matplotlib.pyplot as plt
@@ -55,7 +51,7 @@ parser.add_argument('--itsr', action='store_true', help='Use ITSR variation of a
 parser.add_argument('--plot', action='store_true', help='Plot latent space')
 
 # Other
-parser.add_argument('--latent_vec', default=None, help='Latent vector (use with --generate flag)')
+parser.add_argument('--latent_dim', default=None, help='Latent vector (use with --generate flag)')
 
 
 if len(sys.argv)==1:
@@ -64,13 +60,16 @@ if len(sys.argv)==1:
 argsP = parser.parse_args()
 
 
-def create_model(input_dim, latent_dim, verbose=False, save_graph=False):
+def create_model(input_dim, latent_dim, verbose=False, save_graph=False, conv=True,
+                 adversarial=True):
     '''
     Creates model
     :param input_dim: tuple, dmensions of an image (w*h*ch). W and H has to give modulo of division by 8 = 0
     :param latent_dim: int, number of latent dimensions
     :param verbose: bool, chatty
     :param save_graph: bool, saves latent representation. Work only for 2d latent
+    :param conv: bool, make convolutional model
+    :param adversarial: bool, make adversarial model
     :return: autoencoder, (discriminator), (generator), encoder, decoder
     '''
 
@@ -79,7 +78,7 @@ def create_model(input_dim, latent_dim, verbose=False, save_graph=False):
     generator_input = Input(shape=input_dim)
 
     reshape_dim = int(input_dim[0] / (2 ** 3))
-    if argsP.conv:
+    if conv:
         # Assemble convolutional model
         encoder = Sequential()
         encoder.add(Conv2D(32, kernel_size=(5, 5), input_shape=input_dim, padding='same', activation='relu',
@@ -111,7 +110,7 @@ def create_model(input_dim, latent_dim, verbose=False, save_graph=False):
         decoder.add(UpSampling2D((2, 2)))
         decoder.add(Conv2DTranspose(3, kernel_size=(5, 5), padding='same', activation='sigmoid')) # Relu in CellCognition
 
-        if argsP.adversarial:
+        if adversarial:
             discriminator = Sequential()
             discriminator.add(Dense(reshape_dim**2*16, input_shape=(latent_dim,), activation='relu'))
             discriminator.add(Dense(reshape_dim**2*16, activation='relu'))
@@ -119,22 +118,22 @@ def create_model(input_dim, latent_dim, verbose=False, save_graph=False):
 
 
 
-
+#TODO: non-convolutional
     else:
         encoder = Sequential()
-        encoder.add(Dense(1000, input_shape=input_dim, activation='relu'))
+        encoder.add(Dense(reshape_dim**2*16, input_shape=input_dim, activation='relu'))
         encoder.add(BatchNormalization(axis=-1, momentum=0.9, epsilon=0.001))
-        encoder.add(Dense(1000, activation='relu'))
+        encoder.add(Dense(reshape_dim**2*16, activation='relu'))
         encoder.add(BatchNormalization(axis=-1, momentum=0.9, epsilon=0.001))
         encoder.add(Dense(latent_dim, activation=None))
 
         decoder = Sequential()
-        decoder.add(Dense(1000, input_shape=(latent_dim,), activation='relu'))
-        decoder.add(Dense(1600, activation='relu'))
-        decoder.add(Reshape((reshape_dim, reshape_dim, 16)))
+        decoder.add(Dense(reshape_dim**2*16, input_shape=(latent_dim,), activation='relu'))
+        decoder.add(Dense(reshape_dim**2*16, activation='relu'))
+        decoder.add(Reshape((reshape_dim, reshape_dim, 3)))
         decoder.add(Dense(input_dim, activation='sigmoid'))
 
-        if argsP.adversarial:
+        if adversarial:
             discriminator = Sequential()
             discriminator.add(Dense(1600, input_shape=(latent_dim,), activation='relu'))
             discriminator.add(Dense(1000, activation='relu'))
@@ -143,7 +142,7 @@ def create_model(input_dim, latent_dim, verbose=False, save_graph=False):
     autoencoder = Model(autoencoder_input, decoder(encoder(autoencoder_input)))
     autoencoder.compile(optimizer=Adam(lr=1e-4), loss="mean_squared_error", metrics=['accuracy'])
 
-    if argsP.adversarial:
+    if adversarial:
         discriminator.compile(optimizer=Adam(lr=1e-4), loss="binary_crossentropy", metrics=['accuracy'])
         discriminator.trainable = False
         generator = Model(generator_input, discriminator(encoder(generator_input)))
@@ -152,7 +151,7 @@ def create_model(input_dim, latent_dim, verbose=False, save_graph=False):
     if verbose:
         print("Autoencoder Architecture")
         print(autoencoder.summary())
-        if argsP.adversarial:
+        if adversarial:
             print("Discriminator Architecture")
             print(discriminator.summary())
             print("Generator Architecture")
@@ -160,50 +159,49 @@ def create_model(input_dim, latent_dim, verbose=False, save_graph=False):
 
     if save_graph:
         plot_model(autoencoder, to_file="autoencoder_graph.png")
-        if argsP.adversarial:
+        if adversarial:
             plot_model(discriminator, to_file="discriminator_graph.png")
             plot_model(generator, to_file="generator_graph.png")
 
-    if argsP.adversarial:
+    if adversarial:
         return autoencoder, discriminator, generator, encoder, decoder
     else:
         return autoencoder, None, None, encoder, decoder
 
 
-def train(wd, batch_size, latent_dim, n_epochs):
+
+
+
+
+
+
+
+def train(train_data, out, latent_dim, n_epochs, autoencoder, discriminator, generator, encoder, decoder,
+          adversarial = True):
     '''
     Function to train autoencoder. Arguments will be taken from argparse
-    :param wd: data with subdirs/images
-    :param batch_size: batch size
+    :param train_data: input data from flow_from_directory
+    :param out: dir to save the models
     :param latent_dim: number of latent dimensions
     :param n_epochs: Number of epochs
+    :param autoencoder: created autoencoder model
+    :param discriminator: created discriminator model
+    :param generator: created generator model
+    :param encoder: created encoder part of autoencoder
+    :param decoder: created decoder part of autoencoder
+    :param adversarial: make adversarial model
     :return: trained encoder, decoder, discriminator and generator
     '''
 
-    autoencoder, discriminator, generator, encoder, decoder = create_model(input_dim=argsP.input_dim, latent_dim=argsP.latent_dim)
-    data_loader = ImageDataGenerator(
-        featurewise_center=True,
-        featurewise_std_normalization=True,
-        shear_range=0.2,
-        zoom_range=0.2,
-        horizontal_flip=True)
-
-    train_data = data_loader.flow_from_directory(
-        wd,
-        target_size=(80, 80),
-        batch_size=batch_size,
-        class_mode='input')
-
-    past = datetime.now()
     for epoch in np.arange(1, n_epochs + 1):
         autoencoder_losses = []
-        if argsP.adversarial:
+        if adversarial:
             discriminator_losses = []
             generator_losses = []
 
         autoencoder_history = autoencoder.fit_generator(train_data, epochs=1)
 
-        if argsP.adversarial:
+        if adversarial:
             batch_index = 0
             discriminator_batch_losses = []
             generator_batch_losses = []
@@ -226,7 +224,7 @@ def train(wd, batch_size, latent_dim, n_epochs):
 
         autoencoder_losses.append(autoencoder_history.history["loss"])
         # WandB logging
-        if argsP.adversarial:
+        if adversarial:
             discriminator_losses.append(np.mean(discriminator_batch_losses))
             generator_losses.append(np.mean(generator_batch_losses))
 
@@ -250,20 +248,20 @@ def train(wd, batch_size, latent_dim, n_epochs):
 
         if epoch % 50 == 0:
             print("\nSaving models...")
-            encoder.save(os.path.join(argsP.out, 'encoder.h5'))
-            decoder.save(os.path.join(argsP.out, 'decoder.h5'))
-            if argsP.adversarial:
-                discriminator.save(os.path.join(argsP.out, 'discriminator.h5'))
-                generator.save(os.path.join(argsP.out, 'generator.h5'))
+            encoder.save(os.path.join(out, 'encoder.h5'))
+            decoder.save(os.path.join(out, 'decoder.h5'))
+            if adversarial:
+                discriminator.save(os.path.join(out, 'discriminator.h5'))
+                generator.save(os.path.join(out, 'generator.h5'))
 
-    encoder.save(os.path.join(argsP.out, 'encoder.h5'))
-    decoder.save(os.path.join(argsP.out, 'decoder.h5'))
-    if argsP.adversarial:
-        discriminator.save(os.path.join(argsP.out, 'discriminator.h5'))
-        generator.save(os.path.join(argsP.out, 'generator.h5'))
+    encoder.save(os.path.join(out, 'encoder.h5'))
+    decoder.save(os.path.join(out, 'decoder.h5'))
+    if adversarial:
+        discriminator.save(os.path.join(out, 'discriminator.h5'))
+        generator.save(os.path.join(out, 'generator.h5'))
 
 
-
+# TODO: contionue training
 
 # TODO: all the following
 '''
@@ -365,42 +363,30 @@ if __name__ == "__main__":
     wandb.config.update(argsP)  # adds all of the arguments as config variables
 
     # CREATE MODELS
-    create_model(input_dim, latent_dim, verbose=False, save_graph=False)
+    autoencoder, discriminator, generator, encoder, decoder = create_model(input_dim=argsP.input_dim,
+                                                                           latent_dim=argsP.latent_dim,
+                                                                           verbose=argsP.verbose, save_graph=False,
+                                                                           conv=argsP.conv,
+                                                                           adversarial=argsP.adversarial)
+    # LOAD DATA
+    data_loader = ImageDataGenerator(
+        featurewise_center=True,
+        featurewise_std_normalization=True,
+        shear_range=0.2,
+        zoom_range=0.2,
+        horizontal_flip=True)
 
-    wd = "data/"
-    batch_size = 28
-    input_dim = (80, 80, 3)
-    latent_dim = 64
-    n_epochs = 10
-    conv = True
-    adversarial = True
-    out = "aae/"
-    train(wd, batch_size, latent_dim, n_epochs)
+    train_data = data_loader.flow_from_directory(
+        argsP.wd,
+        target_size=(argsP.input_dim[0], argsP.input_dim[0]),
+        batch_size=argsP.batch,
+        class_mode='input')
 
-
-def main(argv):
-    global desc
-    if argsP.adversarial:
-        desc = "aae"
-    else:
-        desc = "regular"
+    # training mode
     if argsP.train:
-        train(n_samples=argsP.train_samples, batch_size=argsP.batchsize, n_epochs=argsP.epochs)
-    elif argsP.reconstruct:
-        reconstruct(n_samples=FLAGS.test_samples)
-    elif argsP.generate:
-        if argsP.latent_vec:
-            assert len(
-                argsP.latent_vec) == argsP.latent_dim, "Latent vector provided is of dim {}; required dim is {}".format(
-                len(argsP.latent_vec), argsP.latent_dim)
-            generate(argsP.latent_vec)
-        else:
-            generate()
-    elif argsP.generate_grid:
-        generate_grid()
-    elif argsP.plot:
-        plot(argsP.test_samples)
+        train(train_data=train_data, out=argsP.out,
+              latent_dim=argsP.latent_dim, n_epochs=argsP.epoch,
+              autoencoder=autoencoder, discriminator=discriminator,
+              generator=generator, encoder=encoder, decoder=decoder,
+              adversarial=argsP.adversarial)
 
-
-if __name__ == "__main__":
-    app.run(main)
