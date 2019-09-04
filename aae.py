@@ -369,7 +369,8 @@ if __name__ == "__main__":
                                                                            latent_dim=argsP.latent_dim,
                                                                            verbose=argsP.verbose, save_graph=False,
                                                                            conv=argsP.conv,
-                                                                           adversarial=True)
+                                                                           adversarial=argsP.adversarial
+                                                                           )
     # LOAD DATA
     data_loader = ImageDataGenerator(
         featurewise_center=True,
@@ -390,5 +391,6 @@ if __name__ == "__main__":
               latent_dim=argsP.latent_dim, n_epochs=argsP.epoch,
               autoencoder=autoencoder, discriminator=discriminator,
               generator=generator, encoder=encoder, decoder=decoder,
-              adversarial=True)
+              adversarial=argsP.adversarial
+              )
 
