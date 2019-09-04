@@ -263,6 +263,19 @@ def train(train_data, out, latent_dim, n_epochs, autoencoder, discriminator, gen
         generator.save(os.path.join(out, 'generator.h5'))
 
 
+'''
+def reconstruct(n_samples):
+    #encoder = load_model('{}_encoder.h5'.format(desc))
+    #decoder = load_model('{}_decoder.h5'.format(desc))
+
+    choice = np.random.choice(np.arange(n_samples))
+    original = x_test[choice].reshape(1, 784)
+    normalize = colors.Normalize(0., 255.)
+    original = normalize(original)
+    latent = encoder.predict(original)
+    reconstruction = decoder.predict(latent)
+    draw([{"title": "Original", "image": original}, {"title": "Reconstruction", "image": reconstruction}])
+'''
 # TODO: contionue training
 
 # TODO: all the following
@@ -375,6 +388,7 @@ if __name__ == "__main__":
                                                                            )
     # LOAD DATA
     data_loader = ImageDataGenerator(
+        rescale=1. / 255,
         featurewise_center=True,
         featurewise_std_normalization=True,
         shear_range=0.2,
