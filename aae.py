@@ -1,3 +1,5 @@
+# Copyright (c) 2018-present, Anton (Gvaihir) Ogorodnikov, Ye lab UCSF.
+
 from __future__ import print_function
 
 try:
@@ -49,9 +51,6 @@ parser.add_argument('--adversarial', action='store_true', help='Use adversarial 
 parser.add_argument('--conv', action='store_true', help='Use convolutional model. Arch from CellCognition')
 parser.add_argument('--itsr', action='store_true', help='Use ITSR variation of adversarial model')
 parser.add_argument('--plot', action='store_true', help='Plot latent space')
-
-# Other
-parser.add_argument('--latent_dim', default=None, help='Latent vector (use with --generate flag)')
 
 
 if len(sys.argv)==1:
