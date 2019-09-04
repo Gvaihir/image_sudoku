@@ -49,7 +49,7 @@ parser.add_argument('--train', action='store_true', help='Training mode of AAE')
 parser.add_argument('--recons', action='store_true', help='Reconstructing mode of AAE')
 parser.add_argument('--generate', action='store_true', help='Image generation mode from latent space')
 parser.add_argument('--adversarial', action='store_true', help='Use adversarial model')
-parser.add_argument('--conv', action='store_true', help='Use convolutional model. Arch from CellCognition')
+parser.add_argument('--conv', action='store_true', help='Use convolutional model')
 parser.add_argument('--itsr', action='store_true', help='Use ITSR variation of adversarial model')
 parser.add_argument('--plot', action='store_true', help='Plot latent space')
 
@@ -369,7 +369,7 @@ if __name__ == "__main__":
                                                                            latent_dim=argsP.latent_dim,
                                                                            verbose=argsP.verbose, save_graph=False,
                                                                            conv=argsP.conv,
-                                                                           adversarial=argsP.adversarial)
+                                                                           adversarial=True)
     # LOAD DATA
     data_loader = ImageDataGenerator(
         featurewise_center=True,
