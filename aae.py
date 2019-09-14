@@ -225,7 +225,7 @@ def train(train_data, out, latent_dim, n_epochs, autoencoder, discriminator, gen
 
         autoencoder_losses.append(autoencoder_history.history["loss"])
         print("!!!DEBUG")
-        discriminator_losses
+        print(discriminator_losses)
 
         # WandB logging
         if adversarial:
