@@ -9,7 +9,7 @@ BATCH=64
 OUT=/home/aogorodnikov/aae/
 latent_dim=32
 
-mkdir -p $out
+mkdir -p ${OUT}
 
 PYTHON="/home/aogorodnikov/anaconda3/envs/imgSudoku/bin/python"
 
