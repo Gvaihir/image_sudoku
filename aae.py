@@ -222,7 +222,11 @@ def train(train_data, out, latent_dim, n_epochs, autoencoder, discriminator, gen
                 generator_batch_losses.append(generator_history.history["loss"])
 
 
+
         autoencoder_losses.append(autoencoder_history.history["loss"])
+        print("!!!DEBUG")
+        discriminator_losses
+
         # WandB logging
         if adversarial:
             discriminator_losses.append(np.mean(discriminator_batch_losses))
