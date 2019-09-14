@@ -223,7 +223,7 @@ def train(train_data, out, latent_dim, n_epochs, autoencoder, discriminator, gen
             generator_loss = np.mean(generator_batch_losses)
 
             print("discriminator_loss = {}\n".format(
-                discriminator_losses[epoch-1]
+                discriminator_loss
             ))
 
             print("EPOCH {} DONE".format(epoch))
