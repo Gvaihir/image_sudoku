@@ -194,10 +194,6 @@ def train(train_data, out, latent_dim, n_epochs, autoencoder, discriminator, gen
     '''
 
     for epoch in np.arange(1, n_epochs + 1):
-        autoencoder_losses = []
-        if adversarial:
-            discriminator_losses = []
-            generator_losses = []
 
         autoencoder_history = autoencoder.fit_generator(train_data, epochs=1)
 
@@ -221,16 +217,10 @@ def train(train_data, out, latent_dim, n_epochs, autoencoder, discriminator, gen
                 discriminator_batch_losses.append(discriminator_history.history["loss"])
                 generator_batch_losses.append(generator_history.history["loss"])
 
-
-
-        autoencoder_losses.append(autoencoder_history.history["loss"])
-        print("!!!DEBUG")
-        print(discriminator_losses)
-
         # WandB logging
         if adversarial:
-            discriminator_losses.append(np.mean(discriminator_batch_losses))
-            generator_losses.append(np.mean(generator_batch_losses))
+            discriminator_loss = np.mean(discriminator_batch_losses)
+            generator_loss = np.mean(generator_batch_losses)
 
             print("discriminator_loss = {}\n".format(
                 discriminator_losses[epoch-1]
@@ -242,7 +232,8 @@ def train(train_data, out, latent_dim, n_epochs, autoencoder, discriminator, gen
             wandb.log({"phase": epoch,
                        "ae_train_loss": autoencoder_history.history["loss"],
                        "ae_train_acc": autoencoder_history.history["acc"],
-                       "discr_train_loss": discriminator_losses[epoch-1]}, step=epoch)
+                       "discr_train_loss": discriminator_loss,
+                       "gen_train_loss": generator_loss}, step=epoch)
         else:
             wandb.log({"phase": epoch,
                        "ae_train_loss": autoencoder_history.history["loss"],
