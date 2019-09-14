@@ -228,10 +228,8 @@ def train(train_data, out, latent_dim, n_epochs, autoencoder, discriminator, gen
             discriminator_losses.append(np.mean(discriminator_batch_losses))
             generator_losses.append(np.mean(generator_batch_losses))
 
-            print("generator_loss = {}\n"
-                  "generator_acc = {}".format(
-                generator_history.history["loss"],
-                generator_history.history["acc"]
+            print("discriminator_loss = {}\n".format(
+                discriminator_losses[epoch-1]
             ))
 
             print("EPOCH {} DONE".format(epoch))
@@ -240,8 +238,7 @@ def train(train_data, out, latent_dim, n_epochs, autoencoder, discriminator, gen
             wandb.log({"phase": epoch,
                        "ae_train_loss": autoencoder_history.history["loss"],
                        "ae_train_acc": autoencoder_history.history["acc"],
-                       "gen_train_loss": generator_history.history["loss"],
-                       "gen_train_acc": generator_history.history["acc"]}, step=epoch)
+                       "discr_train_loss": discriminator_losses[epoch-1]}, step=epoch)
         else:
             wandb.log({"phase": epoch,
                        "ae_train_loss": autoencoder_history.history["loss"],
