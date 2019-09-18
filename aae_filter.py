@@ -15,24 +15,21 @@ import sys
 
 # keras
 from keras.models import Sequential, Model
-from keras.layers import Input, Dense, Conv2D, MaxPooling2D, Reshape, UpSampling2D, Conv2DTranspose, Flatten, BatchNormalization
 from keras.preprocessing.image import ImageDataGenerator
-from keras.utils import plot_model
 from keras.optimizers import Adam
 
 # logging
 import wandb
 
-# plotting and other
-import matplotlib.pyplot as plt
-from matplotlib import gridspec, colors
-from sklearn.manifold import TSNE
-from absl import flags
+# output
+import json
+
+
 
 parser = argparse.ArgumentParser(
-    description='''Adversarial convolutional autoencoder (ACAE) training''',
+    description='''Deployment of ACAE for data filtering. Outputs JSON with image, full path and adversarial and reconstruction losses''',
     formatter_class=RawTextHelpFormatter,
-    epilog='''Encode wisely''')
+    epilog='''Filter wisely''')
 
 # Main parameters
 parser.add_argument('-i', '--img_wd', default = None, help='directory with images. Default - NONE')
@@ -58,6 +55,13 @@ if len(sys.argv)==1:
     parser.print_help(sys.stderr)
     sys.exit(1)
 argsP = parser.parse_args()
+
+"""
+ToDo: 
+1. 
+"""
+
+
 
 
 def create_model(input_dim, latent_dim, verbose=False, save_graph=False, conv=True,
