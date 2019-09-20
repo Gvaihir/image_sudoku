@@ -4,7 +4,7 @@
 source activate imgSudoku
 
 #train=/sudoku/train_w1
-test=/sudoku/test_w1
+test=/sudoku/kaggle_data/test
 
 for dir in $test/*;
 do
