@@ -3,8 +3,7 @@
 #!/bin/bash
 source activate imgSudoku
 
-#train=/sudoku/train_w1
-test=/sudoku/kaggle_data/test
+test=/sudoku/kaggle_data/train
 
 for dir in $test/*;
 do
@@ -17,7 +16,7 @@ base_sub=$(basename -- "$subdir")
 WD=$subdir
 MODEL="/home/aogorodnikov/models"
 PT=$(echo $subdir | rev | cut -b1 | rev)
-OUT=/sudoku/meta_test/$base_dir/$base_sub
+OUT=/sudoku/meta_train/$base_dir/$base_sub
 DEV="0,1"
 FORMAT="png"
 PYTHON="/home/aogorodnikov/anaconda3/envs/imgSudoku/bin/python"
