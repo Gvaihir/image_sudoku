@@ -3,7 +3,7 @@
 #!/bin/bash
 source activate imgSudoku
 
-train=/sudoku/train_w1
+#train=/sudoku/train_w1
 test=/sudoku/test_w1
 
 for dir in $test/*;
