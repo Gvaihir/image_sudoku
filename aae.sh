@@ -3,10 +3,10 @@
 # Copyright (c) 2018-present, Anton (Gvaihir) Ogorodnikov, Ye lab UCSF.
 source activate imgSudoku
 
-IMG_WD=/home/aogorodnikov/data_aae
+IMG_WD=/home/aogorodnikov/data_aae_5k
 EPOCH=1500
-BATCH=64
-OUT=/home/aogorodnikov/aae/
+BATCH=128
+OUT=/home/aogorodnikov/aae_5k/
 latent_dim=32
 
 mkdir -p ${OUT}
