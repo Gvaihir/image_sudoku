@@ -19,6 +19,9 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.layers import Input
 from keras.optimizers import Adam
 
+# metrics
+from sklearn.metrics import mean_squared_error as mse
+
 # logging
 import wandb
 
@@ -70,6 +73,17 @@ def model_compile(models):
 
     return autoencoder, discriminator, encoder, input_dim, latent_dim
 
+def mse_batch(data_x, data_y, input_dim):
+    shape_1 = input_dim[0]
+    shape_2 = input_dim[1:]
+    reshape_x = np.reshape(data_x, (shape_1, np.prod(shape_2)))
+    reshape_y = np.reshape(data_y, (shape_1, np.prod(shape_2)))
+    return mse(reshape_x, reshape_y)
+
+
+def likelihood()
+
+
 
 class Encodero(object):
     """
@@ -110,7 +124,7 @@ class Encodero(object):
         while batch_index <= data_in.batch_index:
             data = data_in.next()
             data_list = data[0]
-            data_size = len(data_list)
+            data_size = data_list.shape[0]
 
             # for image import - predict, measure MSE
             # take latent space and check binary cross entropy
