@@ -30,7 +30,7 @@ from sklearn.manifold import TSNE
 from absl import flags
 
 parser = argparse.ArgumentParser(
-    description='''Adversarial autoencoder from Makhzani, Alireza, et al. "Adversarial autoencoders." arXiv preprint arXiv:1511.05644 (2015)''',
+    description='''Adversarial convolutional autoencoder (ACAE) training''',
     formatter_class=RawTextHelpFormatter,
     epilog='''Encode wisely''')
 

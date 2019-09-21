@@ -68,14 +68,18 @@ argsP = parser.parse_args()
 if __name__ == "__main__":
 
     # import images
-    X_names = pd.DataFrame(sorted(glob(os.path.join(argsP.wd, '*.'+argsP.format+'*'))))
 
-    ''' 
+    '''
+    sudoku
+    
+    X_names = pd.DataFrame(sorted(glob(os.path.join(argsP.wd, '*.'+argsP.format+'*'))))
+ 
     X_names['base'] = X_names.loc[:,0].str.extract(r'(r\d+c\d+)')
     X_names['field'] = X_names.loc[:, 0].str.extract(r'(f\d+)')
     X_names['file_name'] = X_names.loc[:, 0].str.extract(r'(r\d+c\d+f\d+)')
     '''
-
+    # KAGGLE
+    X_names = pd.DataFrame(sorted(glob(os.path.join(argsP.wd, '*w1.' + argsP.format + '*'))))
     X_names['base'] = X_names.loc[:, 0].str.extract(r'([A-Z]\d+)')
     X_names['field'] = X_names.loc[:, 0].str.extract(r'(s\d+)')
     X_names['file_name'] = X_names.loc[:, 0].str.extract(r'([A-Z]\d+_s\d+_w\d+)')
