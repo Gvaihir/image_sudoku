@@ -14,14 +14,17 @@ import os
 import sys
 
 # keras
-from keras.models import Sequential, Model
+from keras.models import Sequential, Model, load_model
 from keras.preprocessing.image import ImageDataGenerator
 from keras.layers import Input
 from keras.optimizers import Adam
 
 # metrics
 from sklearn.metrics import mean_squared_error as mse
-from scipy.stats import entropy, norm
+from scipy.stats import norm
+from scipy.spatial.distance import jensenshannon as jsd
+
+
 
 # logging
 import wandb
@@ -87,13 +90,14 @@ def mse_batch(data_x, data_y, input_dim):
     reshape_y = np.reshape(data_y, (shape_1, np.prod(shape_2)))
     return mse(reshape_x, reshape_y)
 
-def kld_batch(latent_x, prior):
+def jsd_batch(latent_x, latent_dim):
     '''
     Function to compute adversarial loss
     :param latent_x: encoded latent space
-    :return: KL divergence b/w prior
+    :return: Jensen-Shannon divergence b/w prior
     '''
-    return entropy(latent_x, prior)
+    prior = np.random.randn(latent_dim) * 5.
+    return jsd(norm.pdf(latent_x), norm.pdf(prior))
 
 
 # Main class
@@ -104,23 +108,28 @@ class ACAE_prediction(object):
 
     img_name - full image name
     ae_loss - autoencoder loss (MSE)
-    adv_loss - kl divergence
+    adv_loss - js divergence
     """
 
     def __init__(self):
         '''
         creates set of keys
+        :param models: path to models
         '''
+
+
         self.image = []
         self.ae_loss = []
         self.adv_loss = []
 
 
-    def anomaly_score(self, img_wd, batch, input_dim):
+    def anomaly_score(self, img_wd, batch):
         '''
         function that calculates anomaly scores
-        :param batch:
-        :param input_dim:
+
+        :param img_wd: directory with images
+        :param batch: batch size
+        :param input_dim: dimensions of input vector
         :return:
         '''
         data_loader = ImageDataGenerator(
@@ -131,102 +140,34 @@ class ACAE_prediction(object):
             zoom_range=0.2,
             horizontal_flip=True)
 
-        train_data = data_loader.flow_from_directory(
+        data_in = data_loader.flow_from_directory(
             img_wd,
             target_size=(input_dim[0], input_dim[0]),
             batch_size=batch,
             class_mode='input')
 
-        batch_index = 0
-        discriminator_batch_losses = []
-        while batch_index <= train_data.batch_index:
-            data = train_data.next()
-            data_list = data[0]
-            data_size = len(data_list)
+        self.image.extend(data_in.filepaths)
 
-            fake_latent = encoder.predict(data_list)
-            discriminator_input = np.concatenate((fake_latent, np.random.randn(data_size, latent_dim) * 5.))
-            discriminator_labels = np.concatenate((np.zeros((data_size, 1)), np.ones((data_size, 1))))
-            discriminator_history = discriminator.evaluate(x=discriminator_input, y=discriminator_labels)
-
-            batch_index = batch_index + 1
-            discriminator_batch_losses.append(discriminator_history[0])
-
-        ae_res = autoencoder.evaluate_generator(train_data)[0]
-        adv_res = np.mean(discriminator_batch_losses)
-
-
-def likelihood()
-
-
-
-class Encodero(object):
-    """
-    Object with full path and adversarial and reconstruction losses
-
-    """
-    def __init__(self):
-        self.img_name = []
-        self.rec_loss = []
-        self.adv_loss = []
-
-    def anomaly_score(self, wd, autoencoder, encoder, discriminator, input_dim, latent_dim, batch=16):
-
-        data_loader = ImageDataGenerator(
-            rescale=1. / 255,
-            featurewise_center=True,
-            featurewise_std_normalization=True,
-            shear_range=0,
-            zoom_range=0,
-            horizontal_flip=False)
-        # load data
-        data_in = data_loader.flow_from_directory(
-            wd,
-            target_size=(input_dim[0], input_dim[0]),
-            batch_size=batch,
-            shuffle=False,
-            class_mode='input')
-
-        # get image paths
-        self.img_name.extend(data_in.filepaths)
-
-        # reset iterator
-        data_in.reset()
+        if argsP.verbose:
+            print("Data loaded")
+            sys.stdout.flush()
 
         batch_index = 0
-
         while batch_index <= data_in.batch_index:
             data = data_in.next()
             data_list = data[0]
-            data_size = data_list.shape[0]
 
+            # reconstruction of images
             ae_pred = autoencoder.predict_on_batch(data_list)
+            recons_mse = [mse_batch(data_list[x], ae_pred[x], input_dim) for x in range(len(ae_pred))]
+            self.ae_loss.extend(recons_mse)
 
-            # calculate ae loss
-            ae_batch_losses = [mse_batch(data_list[x], ae_pred[x], input_dim) for x in range(len(ae_pred))]
-            self.rec_loss.extend(ae_batch_losses)
+            # creating latent representation of image features
+            fake_latent = encoder.predict(data_list)
+            adv_loss = [jsd_batch(x, latent_dim) for x in fake_latent]
+            self.adv_loss.extend(adv_loss)
 
-            # calculate adversarial loss
-            fake_latent = encoder.predict_on_batch(data_list)
-
-
-
-
-            batch_index = batch_index + 1
-            discriminator_batch_losses.append(discriminator_history[0])
-
-
-
-            # need data_in._filepaths
-            # optimal batch is 8 or 16
-
-
-
-
-
-
-
-
+            batch_index += 1
 
 
 
