@@ -21,6 +21,7 @@ from keras.optimizers import Adam
 
 # metrics
 from sklearn.metrics import mean_squared_error as mse
+from scipy.stats import entropy, norm
 
 # logging
 import wandb
@@ -54,12 +55,11 @@ def model_compile(models):
     Loads and compiles models
     :param models: directory with encoder, decoder and discriminator
 
-    :return: compiled autoencoder and discriminator
+    :return: compiled autoencoder, discriminator and dimensions
     '''
 
     encoder = load_model(os.path.join(models, "encoder.h5"))
     decoder = load_model(os.path.join(models, "decoder.h5"))
-    discriminator = load_model(os.path.join(models, "discriminator.h5"))
 
     # get input and latent space shapes
     latent_dim = encoder.get_layer(index=-1).output_shape[1]
@@ -69,16 +69,91 @@ def model_compile(models):
     autoencoder_input = Input(shape=input_dim)
     autoencoder = Model(autoencoder_input, decoder(encoder(autoencoder_input)))
     autoencoder.compile(optimizer=Adam(lr=1e-4), loss="mean_squared_error", metrics=['accuracy'])
-    discriminator.compile(optimizer=Adam(lr=1e-4), loss="binary_crossentropy", metrics=['accuracy'])
 
-    return autoencoder, discriminator, encoder, input_dim, latent_dim
+    return autoencoder, encoder, input_dim, latent_dim
+
 
 def mse_batch(data_x, data_y, input_dim):
+    '''
+    Function to compute reconstruction (autoencoder) loss as MSE
+    :param data_x: input image
+    :param data_y: reconstructed image
+    :param input_dim: input dimensions
+    :return: mse
+    '''
     shape_1 = input_dim[0]
     shape_2 = input_dim[1:]
     reshape_x = np.reshape(data_x, (shape_1, np.prod(shape_2)))
     reshape_y = np.reshape(data_y, (shape_1, np.prod(shape_2)))
     return mse(reshape_x, reshape_y)
+
+def kld_batch(latent_x, prior):
+    '''
+    Function to compute adversarial loss
+    :param latent_x: encoded latent space
+    :return: KL divergence b/w prior
+    '''
+    return entropy(latent_x, prior)
+
+
+# Main class
+class ACAE_prediction(object):
+    """
+    Obect with preditions from ACAE
+    Keys:
+
+    img_name - full image name
+    ae_loss - autoencoder loss (MSE)
+    adv_loss - kl divergence
+    """
+
+    def __init__(self):
+        '''
+        creates set of keys
+        '''
+        self.image = []
+        self.ae_loss = []
+        self.adv_loss = []
+
+
+    def anomaly_score(self, img_wd, batch, input_dim):
+        '''
+        function that calculates anomaly scores
+        :param batch:
+        :param input_dim:
+        :return:
+        '''
+        data_loader = ImageDataGenerator(
+            rescale=1. / 255,
+            featurewise_center=True,
+            featurewise_std_normalization=True,
+            shear_range=0.2,
+            zoom_range=0.2,
+            horizontal_flip=True)
+
+        train_data = data_loader.flow_from_directory(
+            img_wd,
+            target_size=(input_dim[0], input_dim[0]),
+            batch_size=batch,
+            class_mode='input')
+
+        batch_index = 0
+        discriminator_batch_losses = []
+        while batch_index <= train_data.batch_index:
+            data = train_data.next()
+            data_list = data[0]
+            data_size = len(data_list)
+
+            fake_latent = encoder.predict(data_list)
+            discriminator_input = np.concatenate((fake_latent, np.random.randn(data_size, latent_dim) * 5.))
+            discriminator_labels = np.concatenate((np.zeros((data_size, 1)), np.ones((data_size, 1))))
+            discriminator_history = discriminator.evaluate(x=discriminator_input, y=discriminator_labels)
+
+            batch_index = batch_index + 1
+            discriminator_batch_losses.append(discriminator_history[0])
+
+        ae_res = autoencoder.evaluate_generator(train_data)[0]
+        adv_res = np.mean(discriminator_batch_losses)
 
 
 def likelihood()
@@ -113,29 +188,29 @@ class Encodero(object):
             class_mode='input')
 
         # get image paths
-        self.img_name.append(data_in.filepaths)
+        self.img_name.extend(data_in.filepaths)
 
         # reset iterator
         data_in.reset()
 
         batch_index = 0
 
-
         while batch_index <= data_in.batch_index:
             data = data_in.next()
             data_list = data[0]
             data_size = data_list.shape[0]
 
-            # for image import - predict, measure MSE
-            # take latent space and check binary cross entropy
-
             ae_pred = autoencoder.predict_on_batch(data_list)
-            ae_batch_losses =
 
+            # calculate ae loss
+            ae_batch_losses = [mse_batch(data_list[x], ae_pred[x], input_dim) for x in range(len(ae_pred))]
+            self.rec_loss.extend(ae_batch_losses)
+
+            # calculate adversarial loss
             fake_latent = encoder.predict_on_batch(data_list)
-            discriminator_input = np.concatenate((fake_latent, np.random.randn(data_size, latent_dim) * 5.))
-            discriminator_labels = np.concatenate((np.zeros((data_size, 1)), np.ones((data_size, 1))))
-            discriminator_history = discriminator.evaluate(x=discriminator_input, y=discriminator_labels)
+
+
+
 
             batch_index = batch_index + 1
             discriminator_batch_losses.append(discriminator_history[0])
