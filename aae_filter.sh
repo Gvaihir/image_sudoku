@@ -6,7 +6,7 @@ conda activate imgSudoku
 IMG_WD=/home/aogorodnikov/test
 MODELS=/home/aogorodnikov/aae_5k
 BATCH=16
-OUT=/home/aogorodnikov/aae_filter_classes
+OUT=/home/aogorodnikov/aae_filter_classes_5k
 
 mkdir -p ${OUT}
 
