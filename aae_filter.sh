@@ -3,7 +3,7 @@
 # Copyright (c) 2018-present, Anton (Gvaihir) Ogorodnikov, Ye lab UCSF.
 conda activate imgSudoku
 
-IMG_WD=/home/aogorodnikov/classes_rgb_corrected
+IMG_WD=/home/aogorodnikov/test
 MODELS=/home/aogorodnikov/aae
 BATCH=16
 OUT=/home/aogorodnikov/aae_filter_classes
