@@ -199,7 +199,7 @@ if __name__ == "__main__":
     obj.anomaly_score(img_wd=argsP.img_wd, batch=argsP.batch)
 
     # create output dir and file
-    out_file = ".".join([os.path.basename(argsP.wd), "json"])
+    out_file = ".".join([os.path.basename(argsP.img_wd), "json"])
 
     ### Export JSON ###
     with open(os.path.join(argsP.out, out_file), "w") as file:
