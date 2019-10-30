@@ -88,7 +88,8 @@ def mse_batch(data_x, data_y, input_dim):
     shape_2 = input_dim[1:]
     reshape_x = np.reshape(data_x, (shape_1, np.prod(shape_2)))
     reshape_y = np.reshape(data_y, (shape_1, np.prod(shape_2)))
-    return mse(reshape_x, reshape_y)
+    mse_out = mse(reshape_x, reshape_y)
+    return round(float(mse_out), 7)
 
 def jsd_batch(latent_x, latent_dim):
     '''
@@ -97,7 +98,8 @@ def jsd_batch(latent_x, latent_dim):
     :return: Jensen-Shannon divergence b/w prior
     '''
     prior = np.random.randn(latent_dim) * 5.
-    return jsd(norm.pdf(latent_x), norm.pdf(prior))
+    jsd_out = jsd(norm.pdf(latent_x), norm.pdf(prior))
+    return round(float(jsd_out), 7)
 
 def ceildiv(a, b):
     '''
