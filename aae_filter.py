@@ -12,6 +12,7 @@ from argparse import RawTextHelpFormatter
 import numpy as np
 import os
 import sys
+import time
 
 # keras
 from keras.models import Sequential, Model, load_model
@@ -186,7 +187,7 @@ if __name__ == "__main__":
 
     global argsP, autoencoder, encoder, input_dim, latent_dim
     argsP = parser.parse_args()
-
+    since = time.time()
     # compile models
     autoencoder, encoder, input_dim, latent_dim = model_compile(argsP.models)
 
@@ -203,6 +204,10 @@ if __name__ == "__main__":
     ### Export JSON ###
     with open(os.path.join(argsP.out, out_file), "w") as file:
         json.dump(obj.__dict__, file)
+
+    time_elapsed = time.time() - since
+    print('Prediction complete in {:.0f}m {:.0f}s'.format(
+        time_elapsed // 60, time_elapsed % 60))
 
 
 
