@@ -51,7 +51,6 @@ parser.add_argument('-v', '--verbose', action='store_true', help='Image generati
 if len(sys.argv)==1:
     parser.print_help(sys.stderr)
     sys.exit(1)
-argsP = parser.parse_args()
 
 def model_compile(models):
     '''
@@ -98,6 +97,12 @@ def jsd_batch(latent_x, latent_dim):
     '''
     prior = np.random.randn(latent_dim) * 5.
     return jsd(norm.pdf(latent_x), norm.pdf(prior))
+
+def ceildiv(a, b):
+    '''
+    Just a ceiling division
+    '''
+    return -(-a // b)
 
 
 # Main class
@@ -152,6 +157,7 @@ class ACAE_prediction(object):
             print("Data loaded")
             sys.stdout.flush()
 
+        n_batches = ceildiv(len(data_in.filepaths), batch)
         batch_index = 0
         while batch_index <= data_in.batch_index:
             data = data_in.next()
@@ -167,7 +173,37 @@ class ACAE_prediction(object):
             adv_loss = [jsd_batch(x, latent_dim) for x in fake_latent]
             self.adv_loss.extend(adv_loss)
 
+            if argsP.verbose:
+                print("Batch {}/{} finished".format(batch_index, n_batches))
+                sys.stdout.flush()
+
             batch_index += 1
+
+
+### MAIN PROGRAM
+
+if __name__ == "__main__":
+
+    global argsP, autoencoder, encoder, input_dim, latent_dim
+    argsP = parser.parse_args()
+
+    # compile models
+    autoencoder, encoder, input_dim, latent_dim = model_compile(argsP.models)
+
+    if argsP.verbose:
+        print("Models compiled")
+        sys.stdout.flush()
+
+    obj = ACAE_prediction()
+    obj.anomaly_score(img_wd=argsP.img_wd, batch=argsP.batch)
+
+    # create output dir and file
+    out_file = ".".join([os.path.basename(argsP.wd), "json"])
+
+    ### Export JSON ###
+    with open(os.path.join(argsP.out, out_file), "w") as file:
+        json.dump(obj.__dict__, file)
+
 
 
 
