@@ -142,11 +142,11 @@ class ACAE_prediction(object):
         '''
         data_loader = ImageDataGenerator(
             rescale=1. / 255,
-            featurewise_center=True,
-            featurewise_std_normalization=True,
+            featurewise_center=False,
+            featurewise_std_normalization=False,
             shear_range=0.2,
             zoom_range=0.2,
-            horizontal_flip=True)
+            horizontal_flip=False)
 
         data_in = data_loader.flow_from_directory(
             img_wd,
