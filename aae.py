@@ -73,7 +73,7 @@ def create_model(input_dim, latent_dim, verbose=False, save_graph=False, conv=Tr
     :return: autoencoder, (discriminator), (generator), encoder, decoder
     '''
 
-    assert input_dim[0]%8 == 0, "Dimension error: Chose H and W dimensions that can be divided by 8 without remnant"
+    assert input_dim[0]%8 == 0, "Dimension error: Chose H and W dimensions that can be divided by 8 without remainder"
     autoencoder_input = Input(shape=input_dim)
     generator_input = Input(shape=input_dim)
 
