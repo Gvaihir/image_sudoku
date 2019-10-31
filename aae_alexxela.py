@@ -279,6 +279,8 @@ def train(train_data, out, latent_dim, n_epochs, autoencoder, discriminator, gen
 
 
 if __name__ == "__main__":
+    global argsP
+    argsP = parser.parse_args()
 
     # initialize monitoring with WandB
     wandb.init(config=argsP)
