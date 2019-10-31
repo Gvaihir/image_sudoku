@@ -41,7 +41,6 @@ parser.add_argument('-e', '--epoch', default=100, type=int, help='Number of trai
 parser.add_argument('-b', '--batch', default=256, type=int, help='Batch size')
 parser.add_argument('-o', '--out', default=os.path.join(os.getcwd(), 'aae_model'), help='output dir. Default - WD/aae')
 parser.add_argument('-v', '--verbose', action='store_true', help='Image generation mode from latent space')
-parser.add_argument('--input_dim', default=[144, 144, 3], nargs='+', type=int, help='Dimensionality of an input image')
 parser.add_argument('--latent_dim', default=128, type=int, help='Dimensionality of a latent space')
 
 
@@ -149,7 +148,7 @@ def create_model(latent_dim, verbose=False, save_graph=False,
     if adversarial:
         discriminator = Sequential()
         discriminator.add(Dense(4096, input_shape=(latent_dim,), activation='relu'))
-        discriminator.add(Dense(reshape_dim**2*16, activation='relu'))
+        discriminator.add(Dense(4096, activation='relu'))
         discriminator.add(Dense(1, activation='sigmoid'))
 
 
@@ -286,9 +285,9 @@ if __name__ == "__main__":
     wandb.config.update(argsP)  # adds all of the arguments as config variables
 
     # input_dim make tuple
-    input_dim = tuple(argsP.input_dim)
+    input_dim = (224, 224, 3)
     # CREATE MODELS
-    autoencoder, discriminator, generator, encoder, decoder = create_model(input_dim=input_dim,
+    autoencoder, discriminator, generator, encoder, decoder = create_model(
                                                                            latent_dim=argsP.latent_dim,
                                                                            verbose=argsP.verbose, save_graph=False,
                                                                            adversarial=argsP.adversarial
