@@ -15,7 +15,7 @@ import sys
 
 # keras
 from keras.models import Sequential, Model
-from keras.layers import Input, Dense, Conv2D, MaxPooling2D, Reshape, UpSampling2D, Conv2DTranspose, Flatten, BatchNormalization
+from keras.layers import Input, Dense, Conv2D, MaxPooling2D, Reshape, UpSampling2D, Conv2DTranspose, Flatten, BatchNormalization, Dropout
 from keras.preprocessing.image import ImageDataGenerator
 from keras.utils import plot_model
 from keras.optimizers import Adam
@@ -36,6 +36,7 @@ parser = argparse.ArgumentParser(
 
 # Main parameters
 parser.add_argument('-i', '--img_wd', default = None, help='directory with images. Default - NONE')
+parser.add_argument('-s', '--sobel', action='store_true', help='Apply sobel transformation')
 parser.add_argument('-e', '--epoch', default=100, type=int, help='Number of training epochs')
 parser.add_argument('-b', '--batch', default=256, type=int, help='Batch size')
 parser.add_argument('-o', '--out', default=os.path.join(os.getcwd(), 'aae_model'), help='output dir. Default - WD/aae')
@@ -59,7 +60,7 @@ if len(sys.argv)==1:
 argsP = parser.parse_args()
 
 
-def create_model(input_dim, latent_dim, verbose=False, save_graph=False,
+def create_model(latent_dim, verbose=False, save_graph=False,
                  adversarial=True):
     '''
     Creates model
@@ -71,46 +72,83 @@ def create_model(input_dim, latent_dim, verbose=False, save_graph=False,
     :return: autoencoder, (discriminator), (generator), encoder, decoder
     '''
 
-    assert input_dim[0]%8 == 0, "Dimension error: Chose H and W dimensions that can be divided by 8 without remnant"
+
+    input_dim = (224, 224, 3)
     autoencoder_input = Input(shape=input_dim)
     generator_input = Input(shape=input_dim)
 
-    reshape_dim = int(input_dim[0] / (2 ** 3))
 
-    # Assemble convolutional model
+    ## ENCODER
     encoder = Sequential()
-    encoder.add(Conv2D(32, kernel_size=(5, 5), input_shape=input_dim, padding='same', activation='relu',
-                       data_format="channels_last"))
-    encoder.add(MaxPooling2D(pool_size=(2, 2)))
-    encoder.add(BatchNormalization(axis=-1, momentum=0.9, epsilon=0.001))
-    encoder.add(Conv2D(32, kernel_size=(3, 3), padding='same', activation='relu'))
-    encoder.add(MaxPooling2D(pool_size=(2, 2)))
-    encoder.add(BatchNormalization(axis=-1, momentum=0.9, epsilon=0.001))
-    encoder.add(Conv2D(32, kernel_size=(3, 3), padding='same', activation='relu'))
-    encoder.add(MaxPooling2D(pool_size=(2, 2)))
-    encoder.add(BatchNormalization(axis=-1, momentum=0.9, epsilon=0.001))
-    encoder.add(Flatten())
-    encoder.add(Dense(reshape_dim**2*16, activation='relu'))  # different, was 256
-    encoder.add(BatchNormalization(axis=-1, momentum=0.9, epsilon=0.001))
-    encoder.add(Dense(reshape_dim**2*16, activation='relu'))  # different, didn't exist
-    encoder.add(BatchNormalization(axis=-1, momentum=0.9, epsilon=0.001))
-    encoder.add(Dense(latent_dim, activation=None))  # different (was reshaping to 64D)
 
+    if argsP.sobel:
+        # Layer 1
+        encoder.add(Conv2D(1, kernel_size=(1, 1), strides=(1, 1), input_shape=input_dim,
+                           data_format="channels_last"))
+        encoder.add(Conv2D(2, kernel_size=(3, 3), strides=(1, 1), padding='same'))
+        encoder.add(Conv2D(96, kernel_size=(11, 11), strides=(4, 4), activation='relu',
+                           data_format="channels_last"))
+    else:
+        # Layer 1
+        encoder.add(Conv2D(96, kernel_size=(11, 11), strides=(4, 4), input_shape=input_dim, activation='relu',
+                           data_format="channels_last"))
+
+
+
+
+
+    encoder.add(BatchNormalization(axis=-1, momentum=0.1, epsilon=1e-5))
+    encoder.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2)))
+    # Layer 2
+    encoder.add(Conv2D(256, kernel_size=(5, 5), strides=(1, 1), padding='same', activation='relu'))
+    encoder.add(BatchNormalization(axis=-1, momentum=0.1, epsilon=1e-5))
+    encoder.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2)))
+
+    # Layer 3
+    encoder.add(Conv2D(384, kernel_size=(3, 3), strides=(1, 1), padding='same', activation='relu'))
+    encoder.add(BatchNormalization(axis=-1, momentum=0.1, epsilon=1e-5))
+
+    # Layer 4
+    encoder.add(Conv2D(384, kernel_size=(3, 3), strides=(1, 1), padding='same', activation='relu'))
+    encoder.add(BatchNormalization(axis=-1, momentum=0.1, epsilon=1e-5))
+
+    # Layer 5
+    encoder.add(Conv2D(256, kernel_size=(3, 3), strides=(1, 1), padding='same', activation='relu'))
+    encoder.add(BatchNormalization(axis=-1, momentum=0.1, epsilon=1e-5))
+    encoder.add(MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding="same"))
+
+    # Dense
+    encoder.add(Flatten())
+    encoder.add(Dropout(rate=0.5))
+    encoder.add(Dense(4096, activation='relu'))
+    encoder.add(Dropout(rate=0.5))
+    encoder.add(Dense(4096, activation='relu'))
+    encoder.add(BatchNormalization(axis=-1, momentum=0.1, epsilon=1e-5))
+    encoder.add(Dense(latent_dim, activation=None))
+
+    ## DECODER
+    # Dense
     decoder = Sequential()
-    decoder.add(Dense(reshape_dim**2*16, input_shape=(latent_dim,), activation='relu'))
-    decoder.add(Dense(reshape_dim**2*16, activation='relu'))
-    decoder.add(Dense(reshape_dim**2*32, activation='relu'))
-    decoder.add(Reshape((reshape_dim, reshape_dim, 32)))
+    decoder.add(Dense(4096, input_shape=(latent_dim,), activation='relu'))
+    decoder.add(Dropout(rate=0.5))
+    decoder.add(Dense(4096, activation='relu'))
+    decoder.add(Dropout(rate=0.5))
+    decoder.add(Dense(9216, activation='relu'))
+
+    # Conv
+    decoder.add(Reshape((6, 6, 256)))
     decoder.add(UpSampling2D((2, 2)))
-    decoder.add(Conv2DTranspose(32, kernel_size=(3, 3), padding='same', activation='relu'))
-    decoder.add(UpSampling2D((2, 2)))
-    decoder.add(Conv2DTranspose(32, kernel_size=(3, 3), padding='same', activation='relu'))
-    decoder.add(UpSampling2D((2, 2)))
-    decoder.add(Conv2DTranspose(3, kernel_size=(5, 5), padding='same', activation='sigmoid')) # Relu in CellCognition
+    decoder.add(Conv2DTranspose(384, kernel_size=(3, 3), strides=(1, 1), padding='same', activation='relu'))
+    decoder.add(Conv2DTranspose(384, kernel_size=(3, 3), strides=(1, 1), padding='same', activation='relu'))
+    decoder.add(Conv2DTranspose(256, kernel_size=(4, 4), strides=(2, 2), padding='valid', activation='relu'))
+    decoder.add(Conv2DTranspose(96, kernel_size=(4, 4), strides=(2, 2), padding='valid', activation='relu'))
+    decoder.add(Conv2DTranspose(3, kernel_size=(12, 12), strides=(4, 4), padding='valid', activation='sigmoid'))
+
+
 
     if adversarial:
         discriminator = Sequential()
-        discriminator.add(Dense(reshape_dim**2*16, input_shape=(latent_dim,), activation='relu'))
+        discriminator.add(Dense(4096, input_shape=(latent_dim,), activation='relu'))
         discriminator.add(Dense(reshape_dim**2*16, activation='relu'))
         discriminator.add(Dense(1, activation='sigmoid'))
 
@@ -240,113 +278,6 @@ def train(train_data, out, latent_dim, n_epochs, autoencoder, discriminator, gen
         generator.save(os.path.join(out, 'generator.h5'))
 
 
-'''
-def reconstruct(n_samples):
-    #encoder = load_model('{}_encoder.h5'.format(desc))
-    #decoder = load_model('{}_decoder.h5'.format(desc))
-
-    choice = np.random.choice(np.arange(n_samples))
-    original = x_test[choice].reshape(1, 784)
-    normalize = colors.Normalize(0., 255.)
-    original = normalize(original)
-    latent = encoder.predict(original)
-    reconstruction = decoder.predict(latent)
-    draw([{"title": "Original", "image": original}, {"title": "Reconstruction", "image": reconstruction}])
-'''
-# TODO: contionue training
-
-# TODO: all the following
-'''
-def reconstruct(n_samples):
-    encoder = load_model('{}_encoder.h5'.format(desc))
-    decoder = load_model('{}_decoder.h5'.format(desc))
-
-    choice = np.random.choice(np.arange(n_samples))
-    original = x_test[choice].reshape(1, 784)
-    normalize = colors.Normalize(0., 255.)
-    original = normalize(original)
-    latent = encoder.predict(original)
-    reconstruction = decoder.predict(latent)
-    draw([{"title": "Original", "image": original}, {"title": "Reconstruction", "image": reconstruction}])
-
-
-def generate(latent=None):
-    decoder = load_model('{}_decoder.h5'.format(desc))
-    if latent is None:
-        latent = np.random.randn(1, FLAGS.latent_dim)
-    else:
-        latent = np.array(latent)
-    sample = decoder.predict(latent.reshape(1, FLAGS.latent_dim))
-    draw([{"title": "Sample", "image": sample}])
-
-
-def draw(samples):
-    fig = plt.figure(figsize=(5 * len(samples), 5))
-    gs = gridspec.GridSpec(1, len(samples))
-    for i, sample in enumerate(samples):
-        ax = plt.Subplot(fig, gs[i])
-        ax.imshow((sample["image"] * 255.).reshape(28, 28), cmap='gray')
-        ax.set_xticks([])
-        ax.set_yticks([])
-        ax.set_aspect('equal')
-        ax.set_title(sample["title"])
-        fig.add_subplot(ax)
-    plt.show(block=False)
-    raw_input("Press Enter to Exit")
-
-
-def generate_grid(latent=None):
-    decoder = load_model('{}_decoder.h5'.format(desc))
-    samples = []
-    for i in np.arange(400):
-        latent = np.array([(i % 20) * 1.5 - 15., 15. - (i / 20) * 1.5])
-        samples.append({
-            "image": decoder.predict(latent.reshape(1, FLAGS.latent_dim))
-        })
-    draw_grid(samples)
-
-
-def draw_grid(samples):
-    fig = plt.figure(figsize=(15, 15))
-    gs = gridspec.GridSpec(20, 20, wspace=-.5, hspace=0)
-    for i, sample in enumerate(samples):
-        ax = plt.Subplot(fig, gs[i])
-        ax.imshow((sample["image"] * 255.).reshape(28, 28), cmap='gray')
-        ax.set_xticks([])
-        ax.set_yticks([])
-        ax.set_aspect('equal')
-        # ax.set_title(sample["title"])
-        fig.add_subplot(ax)
-    plt.show(block=False)
-    raw_input("Press Enter to Exit")
-
-
-# fig.savefig("images/{}_grid.png".format(desc), bbox_inches="tight", dpi=300)
-
-def plot(n_samples):
-    encoder = load_model('{}_encoder.h5'.format(desc))
-    (x_train, y_train), (x_test, y_test) = mnist.load_data()
-    x = x_test[:n_samples].reshape(n_samples, 784)
-    y = y_test[:n_samples]
-    normalize = colors.Normalize(0., 255.)
-    x = normalize(x)
-    latent = encoder.predict(x)
-    if argsP.latent_dim > 2:
-        tsne = TSNE()
-        print("\nFitting t-SNE, this will take awhile...")
-        latent = tsne.fit_transform(latent)
-    fig, ax = plt.subplots()
-    for label in np.arange(10):
-        ax.scatter(latent[(y_test == label), 0], latent[(y_test == label), 1], label=label, s=3)
-    ax.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-    ax.set_aspect('equal')
-    ax.set_title("Latent Space")
-    plt.show(block=False)
-    raw_input("Press Enter to Exit")
-
-
-# fig.savefig("images/{}_latent.png".format(desc), bbox_inches="tight", dpi=300)
-'''
 
 if __name__ == "__main__":
 
