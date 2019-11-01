@@ -4,7 +4,7 @@
 conda activate imgSudoku
 
 IMG_WD=/home/aogorodnikov/classes_rgb_corrected
-MODELS=/home/aogorodnikov/aae_5k
+MODELS=/home/aogorodnikov/aae_2Dlatent
 BATCH=16
 OUT=/home/aogorodnikov/aae_filter_classes
 
