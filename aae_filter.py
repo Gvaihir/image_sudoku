@@ -91,6 +91,8 @@ def mse_batch(data_x, data_y, input_dim):
     mse_out = mse(reshape_x, reshape_y)
     return round(float(mse_out), 7)
 
+
+
 def jsd_batch(latent_x, latent_dim):
     '''
     Function to compute adversarial loss
@@ -152,7 +154,8 @@ class ACAE_prediction(object):
             img_wd,
             target_size=(input_dim[0], input_dim[0]),
             batch_size=batch,
-            class_mode='input')
+            class_mode='input',
+            shuffle=False)
 
         self.image.extend(data_in.filepaths)
 
