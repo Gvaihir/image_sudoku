@@ -6,8 +6,8 @@ source activate imgSudoku
 IMG_WD=/home/aogorodnikov/data_aae
 EPOCH=1500
 BATCH=128
-OUT=/home/aogorodnikov/alexxela/
-latent_dim=64
+OUT=/home/aogorodnikov/alexxela_2Dlatent/
+latent_dim=2
 
 mkdir -p ${OUT}
 
