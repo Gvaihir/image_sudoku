@@ -208,7 +208,7 @@ def train(train_data, out, latent_dim, n_epochs, autoencoder, discriminator, gen
             discriminator_losses = []
             generator_losses = []
 
-        autoencoder_history = autoencoder.fit_generator(train_data, epochs=1)
+        autoencoder_history = autoencoder.fit_generator(train_data, steps_per_epoch=len(train_data),  epochs=1)
 
         if adversarial:
             batch_index = 0
