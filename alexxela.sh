@@ -14,7 +14,7 @@ mkdir -p ${OUT}
 PYTHON="/home/aogorodnikov/anaconda3/envs/imgSudoku/bin/python"
 
 cwd="/sudoku/train"
-${PYTHON} aae_lexxela.py -i ${IMG_WD} -e ${EPOCH} -b ${BATCH} \
+${PYTHON} aae_alexxela.py -i ${IMG_WD} -e ${EPOCH} -b ${BATCH} \
   -o ${OUT} -v --latent_dim $latent_dim \
   --train --adversarial --conv --sobel
 
