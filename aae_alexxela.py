@@ -23,11 +23,6 @@ from keras.optimizers import Adam
 # logging
 import wandb
 
-# plotting and other
-import matplotlib.pyplot as plt
-from matplotlib import gridspec, colors
-from sklearn.manifold import TSNE
-from absl import flags
 
 parser = argparse.ArgumentParser(
     description='''Adversarial autoencoder from Makhzani, Alireza, et al. "Adversarial autoencoders." arXiv preprint arXiv:1511.05644 (2015)''',
