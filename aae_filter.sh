@@ -3,10 +3,10 @@
 # Copyright (c) 2018-present, Anton (Gvaihir) Ogorodnikov, Ye lab UCSF.
 conda activate imgSudoku
 
-IMG_WD=/sudoku/crop_rgb/Pt04
+IMG_WD=/sudoku/crop_rgb/Pt11
 MODELS=/home/aogorodnikov/aae
 BATCH=16
-OUT=/home/aogorodnikov/aae_filter_Pt04
+OUT=/home/aogorodnikov/aae_filter_Pt1_negOnly
 
 mkdir -p ${OUT}
 
