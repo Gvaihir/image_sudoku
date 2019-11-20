@@ -1,3 +1,5 @@
+# Copyright (c) 2018-present, Anton (Gvaihir) Ogorodnikov, Ye lab UCSF.
+
 import cv2
 import numpy as np
 import os

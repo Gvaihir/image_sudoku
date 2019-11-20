@@ -1,3 +1,6 @@
+# Copyright (c) 2018-present, Anton (Gvaihir) Ogorodnikov, Ye lab UCSF.
+
+
 # conda
 from __future__ import print_function, unicode_literals, absolute_import, division
 
@@ -12,6 +15,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import json
 import re
+
 
 
 

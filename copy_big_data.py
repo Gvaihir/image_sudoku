@@ -1,3 +1,5 @@
+# Copyright (c) 2018-present, Anton (Gvaihir) Ogorodnikov, Ye lab UCSF.
+
 import shutil
 import os
 import sys

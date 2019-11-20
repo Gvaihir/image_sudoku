@@ -1,3 +1,5 @@
+# Copyright (c) 2018-present, Anton (Gvaihir) Ogorodnikov, Ye lab UCSF.
+
 import numpy as np
 
 def hist_match(source_in, template_in, channel):
