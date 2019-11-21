@@ -3,7 +3,7 @@
 # Copyright (c) 2018-present, Anton (Gvaihir) Ogorodnikov, Ye lab UCSF.
 source activate imgSudoku
 
-JSON=/home/aogorodnikov/data_aae
+JSON=/home/aogorodnikov/aae_filter_Pt04
 OUT=/home/aogorodnikov/anomaly_links/
 
 mkdir -p ${OUT}
