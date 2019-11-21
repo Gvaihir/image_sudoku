@@ -138,17 +138,3 @@ if __name__ == "__main__":
 
 
 
-
-
-
-
-
-
-
-
-
-'''
-4. create grid of examples of anomalies and normal per row
-'''
-
-
