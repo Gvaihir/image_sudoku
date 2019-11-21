@@ -28,9 +28,6 @@ parser = argparse.ArgumentParser(
 
 # Required parameters
 requiredNamed = parser.add_argument_group('required named arguments')
-
-requiredNamed.add_argument('-i', '--img_wd', help='directory with images.'
-                                                  'Should contain one level of subdirs (e.g. classes)', required=True)
 requiredNamed.add_argument('-j', '--json_file', help='Full path to .json - output of aae_filter.py', required=True)
 requiredNamed.add_argument('-o', '--output', help='Output directory, where input directory structure will be preserved'
                                                   'and symlinks of images will be created', required=True)
