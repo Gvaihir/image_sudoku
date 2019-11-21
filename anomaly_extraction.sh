@@ -10,5 +10,5 @@ mkdir -p ${OUT}
 
 PYTHON="/home/aogorodnikov/anaconda3/envs/imgSudoku/bin/python"
 
-${PYTHON} anomaly_exctraction.py -j ${JSON} -o ${OUT} -a 0.0062016 -d 0.75594133 \
+${PYTHON} anomaly_exctraction.py -j ${JSON} -o ${OUT} -a 0.007576 -d 0.7769362 \
   --example -v
