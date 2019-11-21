@@ -107,7 +107,8 @@ if __name__ == "__main__":
     # CREATE SYMLINK OF ANOMALY IMAGES
     filenames_ls = [os.path.basename(x) for x in df_anomaly.image]
     source_path_ls = df_anomaly.image.to_list()
-    dest_path_ls = [os.path.join(argsP.output, pt, df_anomaly.row.to_list()[x], filenames_ls[x]) for x in range(len(filenames_ls))]
+    anomaly_ls = df_anomaly.row.to_list()
+    dest_path_ls = [os.path.join(argsP.output, pt, anomaly_ls[x], filenames_ls[x]) for x in range(len(filenames_ls))]
     [os.symlink(source_path_ls[x], dest_path_ls[x]) for x in range(len(dest_path_ls))]
 
 
