@@ -16,6 +16,8 @@ import shutil
 import matplotlib.pyplot as plt
 from matplotlib import gridspec, colors
 import seaborn as sns
+import cv2
+
 
 
 parser = argparse.ArgumentParser(
@@ -50,13 +52,16 @@ argsP = parser.parse_args()
 
 # Function for JSON import
 def json_importer(json_file):
+    '''
+    Func to import JSON file and extract additional data
+    :param json_file: path to JSON
+    :return: PAndas Data Frame
+    '''
     with open(json_file, 'r') as json_in:
         df = pd.DataFrame(json.load(json_in))
     df['well'] = [re.search(r'Pt\d+_r\d\dc\d\d', x)[0] for x in df.image]
     df['row'] = [re.search(r'r\d\d', x)[0] for x in df.image]
     return df
-
-
 
 # MAIN FUNC
 if __name__ == "__main__":
@@ -76,6 +81,10 @@ if __name__ == "__main__":
     else: # default
         df_anomaly = df.loc[(df.ae_loss >= argsP.ae_loss) | (df.adv_loss >= argsP.adv_loss)]
 
+    if argsP.verbose:
+        print("Number of images post-threshold:{}".format(df_anomaly.shape[0]))
+        sys.stdout.flush()
+
     # if normal data needed:
     if argsP.example:
         # select random rows and filter to keep only normal
@@ -86,10 +95,49 @@ if __name__ == "__main__":
         # keep 100 random normal images
         df = df.loc[rand_row,:]
 
+
     else:
         del df
 
     # CREATE OUTPUT DIRECTORIES
+    subdirs = df_anomaly.row.unique()
+    pt = os.path.basename(argsP.json_file).split('.')[0]
+    for i in subdirs:
+        outPath = os.path.join(argsP.output, pt, i)
+        if not os.path.exists(outPath):
+            os.makedirs(outPath)
+
+    # CREATE SYMLINK OF ANOMALY IMAGES
+    filenames_ls = [os.path.basename(x) for x in df_anomaly.image]
+    source_path_ls = df_anomaly.image.to_list()
+    dest_path_ls = [os.path.join(argsP.output, pt, df_anomaly.row.to_list()[x], filenames_ls[x]) for x in range(len(filenames_ls))]
+    [os.symlink(source_path_ls[x], dest_path_ls[x]) for x in range(len(dest_path_ls))]
+
+
+    # OPTIONAL export of 25 samples
+    ## Anomaly
+    if argsP.example:
+        for out_type in ['anomaly', 'normal']:
+
+            fig = plt.figure(figsize=(8, 8))
+            columns = 5
+            rows = 5
+            if out_type == "anomaly":
+                source_data = df_anomaly.image
+            else:
+                source_data = df.image
+            rand_select = np.random.choice(source_data, 25, replace=False)
+            for k in range(1, columns * rows + 1):
+                img = cv2.imread(rand_select[k-1], -1)
+
+                fig.add_subplot(rows, columns, k)
+                plt.imshow(img)
+                plt.axis('off')
+
+            plt.savefig(fname=os.path.join(argsP.output, pt, '{}_example.pdf'.format(out_type)))
+
+
+
 
 
 
@@ -100,8 +148,6 @@ if __name__ == "__main__":
 
 
 '''
-2. get row name, create subdir if doesnt exist 
-3. create sym links for anomalies 
 4. create grid of examples of anomalies and normal per row
 '''
 
