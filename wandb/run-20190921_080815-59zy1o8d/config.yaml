@@ -1,0 +1,51 @@
+wandb_version: 1
+
+_wandb:
+  desc: null
+  value:
+    cli_version: 0.8.2
+adversarial:
+  desc: null
+  value: true
+batch:
+  desc: null
+  value: 128
+conv:
+  desc: null
+  value: true
+epoch:
+  desc: null
+  value: 1500
+generate:
+  desc: null
+  value: false
+img_wd:
+  desc: null
+  value: /home/aogorodnikov/data_aae_5k
+input_dim:
+  desc: null
+  value:
+  - 104
+  - 104
+  - 3
+itsr:
+  desc: null
+  value: false
+latent_dim:
+  desc: null
+  value: 32
+out:
+  desc: null
+  value: /home/aogorodnikov/aae_5k/
+plot:
+  desc: null
+  value: false
+recons:
+  desc: null
+  value: false
+train:
+  desc: null
+  value: true
+verbose:
+  desc: null
+  value: true

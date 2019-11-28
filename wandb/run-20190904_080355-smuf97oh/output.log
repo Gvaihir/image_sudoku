@@ -1,0 +1,70 @@
+WARNING:tensorflow:From /home/aogorodnikov/anaconda3/envs/imgSudoku/lib/python3.7/site-packages/tensorflow/python/framework/op_def_library.py:263: colocate_with (from tensorflow.python.framework.ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Colocations handled automatically by placer.
+2019-09-04 08:03:57.214902: I tensorflow/core/platform/cpu_feature_guard.cc:141] Your CPU supports instructions that this TensorFlow binary was not compiled to use: SSE4.1 SSE4.2 AVX AVX2 FMA
+2019-09-04 08:03:57.235878: I tensorflow/core/platform/profile_utils/cpu_utils.cc:94] CPU Frequency: 2300075000 Hz
+2019-09-04 08:03:57.267069: I tensorflow/compiler/xla/service/service.cc:150] XLA service 0x563ac6c290b0 executing computations on platform Host. Devices:
+2019-09-04 08:03:57.267140: I tensorflow/compiler/xla/service/service.cc:158]   StreamExecutor device (0): <undefined>, <undefined>
+Autoencoder Architecture
+Model: "model_1"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+input_1 (InputLayer)         (None, 144, 144, 3)       0         
+_________________________________________________________________
+sequential_1 (Sequential)    (None, 32)                80860640  
+_________________________________________________________________
+sequential_2 (Sequential)    (None, 144, 144, 3)       80829091  
+=================================================================
+Total params: 161,689,731
+Trainable params: 161,668,803
+Non-trainable params: 20,928
+_________________________________________________________________
+None
+Discriminator Architecture
+Model: "sequential_3"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+dense_7 (Dense)              (None, 5184)              171072    
+_________________________________________________________________
+dense_8 (Dense)              (None, 5184)              26879040  
+_________________________________________________________________
+dense_9 (Dense)              (None, 1)                 5185      
+=================================================================
+/home/aogorodnikov/anaconda3/envs/imgSudoku/lib/python3.7/site-packages/keras/engine/training.py:493: UserWarning: Discrepancy between trainable weights and collected trainable weights, did you set `model.trainable` without calling `model.compile` after ?
+  'Discrepancy between trainable weights and collected trainable'
+Total params: 54,110,594
+Trainable params: 27,055,297
+Non-trainable params: 27,055,297
+_________________________________________________________________
+None
+Generator Architecture
+Model: "model_2"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+input_2 (InputLayer)         (None, 144, 144, 3)       0         
+_________________________________________________________________
+sequential_1 (Sequential)    (None, 32)                80860640  
+_________________________________________________________________
+sequential_3 (Sequential)    (None, 1)                 27055297  
+=================================================================
+Total params: 107,915,937
+Trainable params: 80,839,712
+Non-trainable params: 27,076,225
+_________________________________________________________________
+None
+Found 1083 images belonging to 1 classes.
+WARNING:tensorflow:From /home/aogorodnikov/anaconda3/envs/imgSudoku/lib/python3.7/site-packages/tensorflow/python/ops/math_ops.py:3066: to_int32 (from tensorflow.python.ops.math_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.cast instead.
+Epoch 1/1
+/home/aogorodnikov/anaconda3/envs/imgSudoku/lib/python3.7/site-packages/keras_preprocessing/image/image_data_generator.py:716: UserWarning: This ImageDataGenerator specifies `featurewise_center`, but it hasn't been fit on any training data. Fit it first by calling `.fit(numpy_data)`.
+  warnings.warn('This ImageDataGenerator specifies '
+/home/aogorodnikov/anaconda3/envs/imgSudoku/lib/python3.7/site-packages/keras_preprocessing/image/image_data_generator.py:724: UserWarning: This ImageDataGenerator specifies `featurewise_std_normalization`, but it hasn't been fit on any training data. Fit it first by calling `.fit(numpy_data)`.
+  warnings.warn('This ImageDataGenerator specifies '
+1/9 [==>...........................] - ETA: 3:03 - loss: 961.3109 - acc: 0.42312/9 [=====>........................] - ETA: 1:55 - loss: 946.2332 - acc: 0.46923/9 [=========>....................] - ETA: 1:24 - loss: 959.2813 - acc: 0.50354/9 [============>.................] - ETA: 59s - loss: 970.8183 - acc: 0.5137 5/9 [===============>..............] - ETA: 45s - loss: 951.8333 - acc: 0.51716/9 [===================>..........] - ETA: 32s - loss: 953.1289 - acc: 0.51447/9 [======================>.......] - ETA: 21s - loss: 947.8994 - acc: 0.51678/9 [=========================>....] - ETA: 10s - loss: 948.9410 - acc: 0.52069/9 [==============================] - 94s 10s/step - loss: 948.6131 - acc: 0.5283
+generator_loss = [3.538652181625366]
+generator_acc = [0.11864406615495682]
+Epoch 1/1

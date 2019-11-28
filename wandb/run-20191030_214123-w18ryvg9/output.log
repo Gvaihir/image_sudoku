@@ -1,0 +1,21 @@
+WARNING:tensorflow:From /home/aogorodnikov/anaconda3/envs/imgSudoku/lib/python3.7/site-packages/tensorflow/python/framework/op_def_library.py:263: colocate_with (from tensorflow.python.framework.ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Colocations handled automatically by placer.
+2019-10-30 21:41:25.048702: I tensorflow/core/platform/cpu_feature_guard.cc:141] Your CPU supports instructions that this TensorFlow binary was not compiled to use: SSE4.1 SSE4.2 AVX AVX2 FMA
+2019-10-30 21:41:25.055739: I tensorflow/core/platform/profile_utils/cpu_utils.cc:94] CPU Frequency: 2300060000 Hz
+2019-10-30 21:41:25.056577: I tensorflow/compiler/xla/service/service.cc:150] XLA service 0x5635d95bab40 executing computations on platform Host. Devices:
+2019-10-30 21:41:25.056605: I tensorflow/compiler/xla/service/service.cc:158]   StreamExecutor device (0): <undefined>, <undefined>
+Traceback (most recent call last):
+  File "aae.py", line 379, in <module>
+    adversarial=argsP.adversarial
+  File "aae.py", line 133, in create_model
+    decoder.add(Reshape((reshape_dim, reshape_dim, 3)))
+  File "/home/aogorodnikov/anaconda3/envs/imgSudoku/lib/python3.7/site-packages/keras/engine/sequential.py", line 182, in add
+    output_tensor = layer(self.outputs[0])
+  File "/home/aogorodnikov/anaconda3/envs/imgSudoku/lib/python3.7/site-packages/keras/engine/base_layer.py", line 468, in __call__
+    output_shape = self.compute_output_shape(input_shape)
+  File "/home/aogorodnikov/anaconda3/envs/imgSudoku/lib/python3.7/site-packages/keras/layers/core.py", line 399, in compute_output_shape
+    input_shape[1:], self.target_shape)
+  File "/home/aogorodnikov/anaconda3/envs/imgSudoku/lib/python3.7/site-packages/keras/layers/core.py", line 387, in _fix_unknown_dimension
+    raise ValueError(msg)
+ValueError: total size of new array must be unchanged
