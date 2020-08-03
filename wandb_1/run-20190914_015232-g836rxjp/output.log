@@ -1,0 +1,73 @@
+WARNING:tensorflow:From /home/aogorodnikov/anaconda3/envs/imgSudoku/lib/python3.7/site-packages/tensorflow/python/framework/op_def_library.py:263: colocate_with (from tensorflow.python.framework.ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Colocations handled automatically by placer.
+2019-09-14 01:52:33.609446: I tensorflow/core/platform/cpu_feature_guard.cc:141] Your CPU supports instructions that this TensorFlow binary was not compiled to use: SSE4.1 SSE4.2 AVX AVX2 FMA
+2019-09-14 01:52:33.616892: I tensorflow/core/platform/profile_utils/cpu_utils.cc:94] CPU Frequency: 2300035000 Hz
+2019-09-14 01:52:33.617745: I tensorflow/compiler/xla/service/service.cc:150] XLA service 0x56072962d2e0 executing computations on platform Host. Devices:
+2019-09-14 01:52:33.617777: I tensorflow/compiler/xla/service/service.cc:158]   StreamExecutor device (0): <undefined>, <undefined>
+Autoencoder Architecture
+Model: "model_1"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+input_1 (InputLayer)         (None, 104, 104, 3)       0         
+_________________________________________________________________
+sequential_1 (Sequential)    (None, 32)                22069760  
+_________________________________________________________________
+sequential_2 (Sequential)    (None, 104, 104, 3)       22053091  
+=================================================================
+Total params: 44,122,851
+Trainable params: 44,111,843
+Non-trainable params: 11,008
+_________________________________________________________________
+None
+Discriminator Architecture
+Model: "sequential_3"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+dense_7 (Dense)              (None, 2704)              89232     
+_________________________________________________________________
+dense_8 (Dense)              (None, 2704)              7314320   
+_________________________________________________________________
+dense_9 (Dense)              (None, 1)                 2705      
+=================================================================
+/home/aogorodnikov/anaconda3/envs/imgSudoku/lib/python3.7/site-packages/keras/engine/training.py:493: UserWarning: Discrepancy between trainable weights and collected trainable weights, did you set `model.trainable` without calling `model.compile` after ?
+  'Discrepancy between trainable weights and collected trainable'
+Total params: 14,812,514
+Trainable params: 7,406,257
+Non-trainable params: 7,406,257
+_________________________________________________________________
+None
+Generator Architecture
+Model: "model_2"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+input_2 (InputLayer)         (None, 104, 104, 3)       0         
+_________________________________________________________________
+sequential_1 (Sequential)    (None, 32)                22069760  
+_________________________________________________________________
+sequential_3 (Sequential)    (None, 1)                 7406257   
+=================================================================
+Total params: 29,476,017
+Trainable params: 22,058,752
+Non-trainable params: 7,417,265
+_________________________________________________________________
+None
+Found 1083 images belonging to 1 classes.
+WARNING:tensorflow:From /home/aogorodnikov/anaconda3/envs/imgSudoku/lib/python3.7/site-packages/tensorflow/python/ops/math_ops.py:3066: to_int32 (from tensorflow.python.ops.math_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.cast instead.
+Epoch 1/1
+/home/aogorodnikov/anaconda3/envs/imgSudoku/lib/python3.7/site-packages/keras_preprocessing/image/image_data_generator.py:716: UserWarning: This ImageDataGenerator specifies `featurewise_center`, but it hasn't been fit on any training data. Fit it first by calling `.fit(numpy_data)`.
+  warnings.warn('This ImageDataGenerator specifies '
+/home/aogorodnikov/anaconda3/envs/imgSudoku/lib/python3.7/site-packages/keras_preprocessing/image/image_data_generator.py:724: UserWarning: This ImageDataGenerator specifies `featurewise_std_normalization`, but it hasn't been fit on any training data. Fit it first by calling `.fit(numpy_data)`.
+  warnings.warn('This ImageDataGenerator specifies '
+ 1/17 [>.............................] - ETA: 1:22 - loss: 0.1705 - acc: 0.3613 2/17 [==>...........................] - ETA: 49s - loss: 0.1684 - acc: 0.3815  3/17 [====>.........................] - ETA: 37s - loss: 0.1673 - acc: 0.3808 4/17 [======>.......................] - ETA: 30s - loss: 0.1640 - acc: 0.3879 5/17 [=======>......................] - ETA: 25s - loss: 0.1611 - acc: 0.3872 6/17 [=========>....................] - ETA: 22s - loss: 0.1567 - acc: 0.3890 7/17 [===========>..................] - ETA: 19s - loss: 0.1517 - acc: 0.3885 8/17 [=============>................] - ETA: 16s - loss: 0.1451 - acc: 0.3896 9/17 [==============>...............] - ETA: 14s - loss: 0.1373 - acc: 0.391210/17 [================>.............] - ETA: 12s - loss: 0.1298 - acc: 0.394411/17 [==================>...........] - ETA: 10s - loss: 0.1219 - acc: 0.395812/17 [====================>.........] - ETA: 8s - loss: 0.1146 - acc: 0.3991 13/17 [=====================>........] - ETA: 6s - loss: 0.1077 - acc: 0.403014/17 [=======================>......] - ETA: 4s - loss: 0.1014 - acc: 0.407115/17 [=========================>....] - ETA: 3s - loss: 0.0957 - acc: 0.411216/17 [===========================>..] - ETA: 1s - loss: 0.0907 - acc: 0.414217/17 [==============================] - 27s 2s/step - loss: 0.0862 - acc: 0.4189
+!!!DEBUG
+discriminator_loss = 0.28551124781370163
+
+EPOCH 1 DONE
+Epoch 1/1
+ 1/17 [>.............................] - ETA: 31s - loss: 0.0103 - acc: 0.4976 2/17 [==>...........................] - ETA: 27s - loss: 0.0111 - acc: 0.4934 3/17 [====>.........................] - ETA: 25s - loss: 0.0115 - acc: 0.5027 4/17 [======>.......................] - ETA: 22s - loss: 0.0116 - acc: 0.4978 5/17 [=======>......................] - ETA: 20s - loss: 0.0119 - acc: 0.4932 6/17 [=========>....................] - ETA: 17s - loss: 0.0120 - acc: 0.5023 7/17 [===========>..................] - ETA: 15s - loss: 0.0121 - acc: 0.5100 8/17 [=============>................] - ETA: 14s - loss: 0.0120 - acc: 0.5089 9/17 [==============>...............] - ETA: 12s - loss: 0.0121 - acc: 0.509010/17 [================>.............] - ETA: 10s - loss: 0.0121 - acc: 0.518811/17 [==================>...........] - ETA: 8s - loss: 0.0121 - acc: 0.5209 12/17 [====================>.........] - ETA: 7s - loss: 0.0121 - acc: 0.518113/17 [=====================>........] - ETA: 5s - loss: 0.0121 - acc: 0.5156

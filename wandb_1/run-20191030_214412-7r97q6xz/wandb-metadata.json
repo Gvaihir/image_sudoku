@@ -1,0 +1,25 @@
+{
+    "root": "/home/aogorodnikov/image_sudoku",
+    "program": "image_sudoku/aae_test.ipynb",
+    "git": {
+        "remote": "https://github.com/Gvaihir/image_sudoku",
+        "commit": "6753db73b43516d7ac7286a9758f7dc260564e3f"
+    },
+    "email": "pcf11differentiation@gmail.co",
+    "startedAt": "2019-10-30T21:44:52.945411",
+    "host": "ip-10-212-1-199",
+    "username": "aogorodnikov",
+    "os": "Linux-4.4.0-1096-aws-x86_64-with-debian-stretch-sid",
+    "python": "3.7.3",
+    "executable": "/home/aogorodnikov/anaconda3/envs/imgSudoku/bin/python",
+    "gpu": "Tesla M60",
+    "gpu_count": 1,
+    "cpu_count": 16,
+    "cuda": "10.1.105",
+    "args": [
+        "-f",
+        "/run/user/823601764/jupyter/kernel-48e30dcf-753d-4eb2-b226-bdc4e6ee38c2.json"
+    ],
+    "state": "running",
+    "heartbeatAt": "2019-10-30T21:46:34.841622"
+}

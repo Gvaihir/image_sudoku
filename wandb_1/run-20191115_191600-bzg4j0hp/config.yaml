@@ -1,0 +1,45 @@
+wandb_version: 1
+
+_wandb:
+  desc: null
+  value:
+    cli_version: 0.8.2
+adversarial:
+  desc: null
+  value: true
+batch:
+  desc: null
+  value: 128
+epoch:
+  desc: null
+  value: 1500
+generate:
+  desc: null
+  value: false
+img_wd:
+  desc: null
+  value: /home/aogorodnikov/data_aae
+itsr:
+  desc: null
+  value: false
+latent_dim:
+  desc: null
+  value: 2
+out:
+  desc: null
+  value: /home/aogorodnikov/alexxela_2Dlatent/
+plot:
+  desc: null
+  value: false
+recons:
+  desc: null
+  value: false
+sobel:
+  desc: null
+  value: true
+train:
+  desc: null
+  value: true
+verbose:
+  desc: null
+  value: true
